@@ -27,12 +27,10 @@ results[["tbl_trend"]] <- summariseTrend(cdm = cdm,
                             interval = "years")
 
 logMessage("LSC summary")
-cdm <- generateDenominatorCohortSet(cdm, "denom")
-results[["lsc"]] <- summariseLargeScaleCharacteristics(cdm$denom,
-                                          window = c(-Inf, Inf),
-                                          eventInWindow = "device_exposure",
-                                          includeSource = c(TRUE, FALSE),
-                                          minimumFrequency = 0)
+# change summarise concepts
+logMessage("concept summary")
+results[["device_concept_counts"]] <- summariseConceptIdCounts(cdm = cdm,
+                                                               omopTableName = "device_exposure")
 
 logMessage("UID summary")
 results[["uid_standard"]] <- cdm$device_exposure |>
@@ -71,21 +69,37 @@ names(cl) <- omopgenerics::toSnakeCase(names(cl))
 names(cl) <- stringr::str_trunc(names(cl), width = 22, ellipsis = "")
 
 logMessage("- create cohorts")
-cdm$top_ten_device_concepts <- conceptCohort(cdm,
+results[["top_ten_device_concepts"]] <- conceptCohort(cdm,
                                              conceptSet = cl,
                                              name = "top_ten_device_concepts",
                                              exit = "event_start_date")
 logMessage("- summarise characteristics")
-chars_top_ten <- cdm$top_ten_device_concepts |>
+results[["chars_top_ten"]] <- cdm$top_ten_device_concepts |>
   summariseCharacteristics()
 
 logMessage("- summarise lsc")
-lsc_top_ten <- cdm$top_ten_device_concepts |>
+results[["lsc_top_ten"]] <- cdm$top_ten_device_concepts |>
   summariseLargeScaleCharacteristics(window = list(c(0, 0),
                                                    c(-7, 7)),
                                      eventInWindow = c("condition_occurrence",
                                                        "procedure_occurrence",
                                                        "drug_exposure"),
+                                     minimumFrequency = 0.005)
+
+logMessage("Procedure cohorts")
+cdm$proc <- conceptCohort(cdm,
+                          conceptSet = list(
+                            hip_replacement = c(4144432, 4203771, 4146785,
+                                                44514773, 44514780, 44515507),
+                            pacemaker = c(4184306, 44511205, 44511204, 4180293,
+                                          4019139,4144921, 4180298,
+                                          44790501, 44790298, 44790432)),
+                          exit = "event_end_date",
+                          name = "proc")
+results[["lsc_proc"]] <- cdm$proc |>
+  summariseLargeScaleCharacteristics(window = list(c(0, 0),
+                                                   c(-7, 7)),
+                                     eventInWindow = c("device_exposure"),
                                      minimumFrequency = 0.005)
 
 

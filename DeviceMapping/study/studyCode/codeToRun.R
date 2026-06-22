@@ -10,7 +10,6 @@ library(OmopSketch)
 library(CohortConstructor)
 library(PatientProfiles)
 library(CohortCharacteristics)
-library(IncidencePrevalence)
 library(odbc)
 library(RPostgres)
 
