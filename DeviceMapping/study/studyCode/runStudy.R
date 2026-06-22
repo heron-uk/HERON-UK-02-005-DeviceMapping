@@ -69,7 +69,7 @@ names(cl) <- omopgenerics::toSnakeCase(names(cl))
 names(cl) <- stringr::str_trunc(names(cl), width = 22, ellipsis = "")
 
 logMessage("- create cohorts")
-results[["top_ten_device_concepts"]] <- conceptCohort(cdm,
+cdm$top_ten_device_concepts <- conceptCohort(cdm,
                                              conceptSet = cl,
                                              name = "top_ten_device_concepts",
                                              exit = "event_start_date")
