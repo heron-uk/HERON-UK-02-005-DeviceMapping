@@ -35,19 +35,21 @@ results[["device_concept_counts"]] <- summariseConceptIdCounts(cdm = cdm,
 logMessage("UID summary")
 results[["uid_standard"]] <- cdm$device_exposure |>
   addConceptName("device_concept_id") |>
-  summariseResult(variables = c("unique_device_id"),
-                  group = c("device_concept_id", "device_concept_id_name"),
-                  includeOverallStrata = FALSE)
+  summariseResult(group = c("device_concept_id",
+                            "device_concept_id_name"),
+                  includeOverallStrata = FALSE,
+                  variables = c())
 results[["uid_standard_source"]] <- cdm$device_exposure |>
   addConceptName("device_concept_id") |>
   addConceptName("device_source_concept_id") |>
-  summariseResult(variables = c("unique_device_id"),
-                  group = c("device_concept_id",
+  summariseResult(group = c("device_concept_id",
                             "device_concept_id_name",
+                            "unique_device_id",
                             "device_source_concept_id",
                             "device_source_concept_id_name",
                             "device_source_value"),
-                  includeOverallStrata = FALSE)
+                  includeOverallStrata = FALSE,
+                  variables = c())
 
 logMessage("Characterise top 10 standard device concepts")
 logMessage("- get top 10")

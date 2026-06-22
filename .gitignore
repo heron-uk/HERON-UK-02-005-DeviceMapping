@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 DeviceMapping/DeviceMapping.Rproj
+DeviceMapping/shiny/rawData/results_IDRIL_1_2026_06_22.csv
+DeviceMapping/shiny/data/studyData.RData
