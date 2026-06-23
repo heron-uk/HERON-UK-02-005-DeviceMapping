@@ -83,21 +83,12 @@ results[["chars_top_3"]] <- cdm$top_3_device_concepts |>
 
 logMessage("- summarise lsc")
 results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
-  summariseLargeScaleCharacteristics(window = list(c(0, 0)),
-                                     eventInWindow = c("procedure_occurrence"),
-                                     minimumFrequency = 0.005)
-results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
-  summariseLargeScaleCharacteristics(window = list(c(0, 0),
-                                                   c(-7, 7)),
-                                     eventInWindow = c("condition_occurrence",
+  summariseLargeScaleCharacteristics(window = list(c(-7, 7)),
+                                     eventInWindow = c("procedure_occurrence",
+                                                       "condition_occurrence",
                                                        "drug_exposure"),
                                      minimumFrequency = 0.005)
 
-cdm$top_3_device_concepts |>
-  PatientProfiles::addTableIntersectField(tableName = "measurement",
-                                          field =  "measurement_source_value",
-                                          window = c(0, 0),
-                                          allowDuplicates = TRUE)
 
 # logMessage("Procedure cohorts")
 # cdm$proc <- conceptCohort(cdm,
