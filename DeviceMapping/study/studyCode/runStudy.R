@@ -26,16 +26,6 @@ results[["tbl_trend"]] <- summariseTrend(cdm = cdm,
                                          event = "device_exposure",
                                          interval = "years")
 
-# summary of standard concept
-logMessage("concept counts - overall")
-results[["device_concept_counts_overall"]] <- summariseConceptIdCounts(cdm = cdm,
-                                                                       omopTableName = "device_exposure",
-                                                                       interval = c("overall"))
-logMessage("concept counts - yearly")
-results[["device_concept_counts_yearly"]] <- summariseConceptIdCounts(cdm = cdm,
-                                                                      omopTableName = "device_exposure",
-                                                                      interval = c("years"))
-
 # summary of UID
 logMessage("UID summary")
 results[["uid_standard_source"]] <- cdm$device_exposure |>
@@ -47,13 +37,9 @@ results[["uid_standard_source"]] <- cdm$device_exposure |>
   addConceptName("device_concept_id") |>
   addConceptName("device_source_concept_id") |>
   summariseResult(variables = character(),
-                  strata = "year",
                   group = c("device_concept_id",
                             "device_concept_id_name",
-                            "unique_device_id",
-                            "device_source_concept_id",
-                            "device_source_concept_id_name",
-                            "device_source_value"))
+                            "unique_device_id"))
 
 
 logMessage("Characterise top 3 standard device concepts")
