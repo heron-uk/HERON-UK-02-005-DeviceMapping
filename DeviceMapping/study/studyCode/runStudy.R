@@ -39,18 +39,21 @@ results[["device_concept_counts_yearly"]] <- summariseConceptIdCounts(cdm = cdm,
 # summary of UID
 logMessage("UID summary")
 results[["uid_standard_source"]] <- cdm$device_exposure |>
-  mutate(year = clock::get_year(device_exposure_start_date)) |>
+  mutate(year = clock::get_year(device_exposure_start_date),
+         # to ensure they don't get silently ignored
+         device_concept_id = dplyr::coalesce(device_concept_id, 0L),
+         device_source_concept_id = dplyr::coalesce(device_source_concept_id, 0L),
+         unique_device_id = dplyr::coalesce(as.character(unique_device_id), "unknown")) |>
   addConceptName("device_concept_id") |>
   addConceptName("device_source_concept_id") |>
-  summariseResult(variables = c("unique_device_id"),
+  summariseResult(variables = character(),
                   strata = "year",
                   group = c("device_concept_id",
                             "device_concept_id_name",
+                            "unique_device_id",
                             "device_source_concept_id",
                             "device_source_concept_id_name",
                             "device_source_value"))
-
-
 
 
 logMessage("Characterise top 3 standard device concepts")
@@ -83,12 +86,21 @@ results[["chars_top_3"]] <- cdm$top_3_device_concepts |>
 
 logMessage("- summarise lsc")
 results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
-  summariseLargeScaleCharacteristics(window = list(c(-7, 7)),
-                                     eventInWindow = c("procedure_occurrence",
-                                                       "condition_occurrence",
+  summariseLargeScaleCharacteristics(window = list(c(0, 0)),
+                                     eventInWindow = c("procedure_occurrence"),
+                                     minimumFrequency = 0.005)
+results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
+  summariseLargeScaleCharacteristics(window = list(c(0, 0),
+                                                   c(-7, 7)),
+                                     eventInWindow = c("condition_occurrence",
                                                        "drug_exposure"),
                                      minimumFrequency = 0.005)
 
+cdm$top_3_device_concepts |>
+  PatientProfiles::addTableIntersectField(tableName = "measurement",
+                                          field =  "measurement_source_value",
+                                          window = c(0, 0),
+                                          allowDuplicates = TRUE)
 
 # logMessage("Procedure cohorts")
 # cdm$proc <- conceptCohort(cdm,
