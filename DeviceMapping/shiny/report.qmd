@@ -1,0 +1,161 @@
+---
+title: "Device mapping summary"
+format: docx
+editor: visual
+execute:
+  echo: false
+  warning: false
+---
+
+```{r}
+library(here)
+library(omopgenerics)
+library(dplyr)
+library(OmopSketch)
+library(CohortCharacteristics)
+library(ggplot2)
+library(visOmopResults)
+library(flextable)
+library(tidyr)
+
+res <- importSummarisedResult(here::here("rawData"))
+```
+
+## Summary of device exposure table
+
+```{r}
+tableClinicalRecords(res, type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")
+```
+
+\newpage
+
+## Trends in device records over time
+
+```{r}
+plotTrend(res) + 
+  ggtitle("Trend in device exposure records") +
+  ylim(c(0, NA))
+```
+
+\newpage
+
+## Device concept IDs
+
+```{r}
+res |> 
+  filterSettings(result_type == "summarise_table") |> 
+  filterSettings(stringr::str_detect(group, "source")) |> 
+  tidy() |> 
+  filter(!is.na(count)) |> 
+  filter(variable_name == "number records") |> 
+  mutate(missing_uid = if_else(is.na(unique_device_id), "missing", "non_missing")) |> 
+  summarise(tot = sum(count),
+            .by = c(device_concept_id, device_concept_id_name, missing_uid)) |> 
+  pivot_wider(names_from = "missing_uid", values_from = "tot") |> 
+  dplyr::mutate(missing = replace_na(missing, 0),
+                non_missing = replace_na(non_missing, 0)) |> 
+  mutate(
+    number_of_records = missing + non_missing,
+    percentage_with_unique_identifier = paste0((non_missing / number_of_records)*100, "%")
+  )  |> 
+  select(device_concept_id, device_concept_id_name,
+         number_of_records, 
+         percentage_with_unique_identifier) |> 
+  arrange(desc(number_of_records)) |> 
+  visTable(type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")
+```
+
+\newpage
+
+## Unique identifiers per device concept ID
+
+```{r}
+uid <- res |> 
+  filterSettings(result_type == "summarise_table") |> 
+  filterSettings(stringr::str_detect(group, "source")) |> 
+  tidy() |> 
+  filter(!is.na(unique_device_id)) |> 
+  filter(!is.na(count)) |> 
+  filter(variable_name == "number records") |> 
+  arrange(desc(count))
+
+uid |> 
+  # filter(device_concept_id == "45758380") |> 
+  arrange(desc(count)) |> 
+  select(device_concept_id, device_concept_id_name,
+         unique_device_id,
+         device_source_value, count) |> 
+  visTable(groupColumn = c("device_concept_id_name", "device_concept_id"), 
+           type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")
+
+```
+
+\newpage
+
+## Characterisation of top 10 devices
+
+```{r}
+c_order <- res |> 
+  filterSettings(result_type == "summarise_characteristics") |> 
+  filter(variable_name == "Number records") |> 
+  tidy() |> 
+  arrange(desc(count)) |> 
+  pull(cohort_name)
+
+res |> 
+  filterSettings(result_type == "summarise_characteristics") |> 
+  mutate(group_level = factor(group_level, levels = c_order)) |> 
+  arrange(group_level) |> 
+  mutate(group_level = as.character(group_level)) |> 
+  tableCharacteristics(header = c("cdm_name"), 
+                     groupColumn = "cohort_name", 
+           type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")
+```
+
+\newpage
+
+```{r}
+res |> 
+  filterSettings(table_name == "procedure_occurrence") |> 
+  filter(variable_level == "0 to 0") |> 
+  mutate(group_level = factor(group_level, levels = c_order)) |> 
+  arrange(group_level) |> 
+  mutate(group_level = as.character(group_level)) |> 
+  tableTopLargeScaleCharacteristics(, 
+           type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")|>
+  set_caption(caption = "Most common procedure codes seen on same day as device exposure")
+```
+
+\newpage
+
+```{r}
+res |> 
+  filterSettings(table_name == "condition_occurrence") |> 
+  filter(variable_level == "-7 to 7") |> 
+  mutate(group_level = factor(group_level, levels = c_order)) |> 
+  arrange(group_level) |> 
+  mutate(group_level = as.character(group_level)) |> 
+  tableTopLargeScaleCharacteristics(type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")|>
+  set_caption(caption = "Most common condition occurrence codes seen on same day as device exposure")
+```
+
+\newpage
+
+```{r}
+res |> 
+  filterSettings(table_name == "drug_exposure") |> 
+  filter(variable_level == "-7 to 7") |> 
+  mutate(group_level = factor(group_level, levels = c_order)) |> 
+  arrange(group_level) |> 
+  mutate(group_level = as.character(group_level)) |> 
+  tableTopLargeScaleCharacteristics(, 
+           type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")|>
+  set_caption(caption = "Most common drug exposure codes seen on same day as device exposure")
+```
