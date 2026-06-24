@@ -82,12 +82,6 @@ results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
                                                        "drug_exposure"),
                                      minimumFrequency = 0.005)
 
-cdm$top_3_device_concepts |>
-  PatientProfiles::addTableIntersectField(tableName = "measurement",
-                                          field =  "measurement_source_value",
-                                          window = c(0, 0),
-                                          allowDuplicates = TRUE)
-
 # logMessage("Procedure cohorts")
 # cdm$proc <- conceptCohort(cdm,
 #                           conceptSet = list(
