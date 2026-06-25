@@ -127,7 +127,7 @@ names(dc) <- paste0("concept_", dc)
 logMessage("- create cohorts")
 cdm$dc <- conceptCohort(cdm,
                         conceptSet = dc,
-                        name = "device_concepts",
+                        name = "dc",
                         exit = "event_start_date")
 
 logMessage("- summarise characteristics")
