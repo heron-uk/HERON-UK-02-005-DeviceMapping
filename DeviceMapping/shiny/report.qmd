@@ -20,7 +20,7 @@ library(tidyr)
 library(scales)
 
 res <- importSummarisedResult(here::here("rawData"))
-res |> 
+res <- res |> 
   mutate(cdm_name = if_else(cdm_name == "IDRIL_1", 
                             "Lancs", cdm_name))|> 
   mutate(cdm_name = if_else(cdm_name == "omop", 
@@ -97,7 +97,13 @@ id_counts <- res |>
 id_counts |> 
   summarise(records = sum(count), 
             .by = c(cdm_name, standard_concept, has_udi)) |> 
-  mutate(percentage = scales::percent(records / sum(records), accuracy = 0.1)) |> 
+  left_join(
+  id_counts |> 
+  summarise(total = sum(count), 
+            .by = c(cdm_name)),
+  by = join_by(cdm_name)) |> 
+  mutate(percentage = scales::percent(records / total, accuracy = 0.1)) |> 
+  select(!total) |> 
   arrange(cdm_name, desc(records)) |> 
   mutate(records = scales::comma(records)) |> 
   visTable(groupColumn = "cdm_name", type = "flextable") |>
@@ -108,13 +114,34 @@ id_counts |>
 
 ## Trends in device records over time
 
-```{r}
-plotTrend(res, colour = "cdm_name") + 
-  ggtitle("Trend in device exposure records") +
+```{r, echo=FALSE, warning = FALSE, message=FALSE, results = 'asis', fig.align="center", fig.width=10, fig.height=7, out.width = '90%', dpi=600}
+attr(res, "settings") <- attr(res, "settings") |> 
+  mutate(trend_type = case_when(
+    has_uid == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
+    has_uid == "TRUE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwithout unique identifier",
+    has_uid == "FALSE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwithout unique identifier",
+    has_uid == "FALSE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwith unique identifier",
+    .default = "All records"
+  ))
+
+
+plot <- plotTrend(res, 
+          colour = c("trend_type"))
+plot@data |> 
+  ggplot() +
+  geom_point(aes(time_interval, count, colour = trend_type)) +
+  geom_line(aes(time_interval, count, group = trend_type, colour = trend_type)) +
+  facet_grid(cdm_name ~ ., 
+             scales = "free_y") +
+  theme_bw() +
   ylim(c(0, NA))  +
   scale_y_continuous(labels = scales::comma) +
-  facet_grid(cdm_name ~ ., 
-             scales = "free_y")
+  theme(legend.title = element_blank(),
+        legend.position = "right", 
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  guides(colour = guide_legend(ncol = 1)) +
+  xlab("") +
+  ylab("Number of records")
 ```
 
 \newpage
