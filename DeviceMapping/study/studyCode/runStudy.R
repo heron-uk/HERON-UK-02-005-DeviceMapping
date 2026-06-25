@@ -84,54 +84,63 @@ results[["uid_standard_source"]] <- cdm$device_exposure |>
                             "unique_device_id"))
 
 
-logMessage("Characterise top 3 standard device concepts")
-logMessage("- get top 3")
-top_3_concepts <- cdm$device_exposure |>
-  addConceptName("device_concept_id") |>
-  group_by(device_concept_id,
-           device_concept_id_name) |>
-  tally() |>
-  collect() |>
-  filter(device_concept_id != "0") |>
-  arrange(desc(n)) |>
-  slice_head(n = 3)
+logMessage("Characterise top selected standard device concepts")
+device_concepts <- c(
+# opthamology - lens
+45758993, # Posterior-chamber intraocular lens, pseudophakic
+45758380, # Anterior-chamber intraocular lens, pseudophakic
+# cardiology - valve replacement
+3661561, # Aortic valve bioprosthesis
+3661562, # Mitral valve bioprosthesis
+# cardiology - pacemaker
+4231009, # Cardiac pacemaker electrode
+45772840, # Implantable cardiac pacemaker
+2615795, # Pacemaker, dual chamber, rate-responsive (implantable)
+2615796, # Pacemaker, single chamber, rate-responsive (implantable)
+# repiratory
+45762420, # Endobronchial valve
+# orthopedic
+46273109, # Femoral stem centralizer
+45761725, # Ceramic femoral head prosthesis
+45761793, # Acetabular shell
+45760907, # Uncoated knee tibia prosthesis, polyethene
+45763037, # Bipolar femoral head prosthesis
+45760762, # Uncoated hip femur prosthesis, modular
+45761165, # Uncoated knee tibia prosthesis, metallic
+45758713, # Metallic femoral head prosthesis
+45758465, # Polyethylene patella prosthesis
+45772469, # Coated hip femur prosthesis, modular
+45760486, # Uncoated femoral stem prosthesis, modular
+45768074, # Knee tibia prosthesis
+45761776, # Coated femoral stem prosthesis, modular
+45771801, # Uncoated knee femur prosthesis
+# mesh
+45768044, # Surgical mesh
+4223318, # Mesh
+45765017 # Pelvic organ prolapse surgical mesh, composite
+)
 
-cl <- top_3_concepts |>
-  select(device_concept_id_name, device_concept_id) |>
-  mutate(device_concept_id_name = paste0(device_concept_id, "_", device_concept_id_name)) |>
-  tibble::deframe() |>
+dc <- device_concepts |>
   as.list()
-names(cl) <- omopgenerics::toSnakeCase(names(cl))
-names(cl) <- stringr::str_trunc(names(cl), width = 22, ellipsis = "")
+names(dc) <- paste0("concept_", dc)
 
 logMessage("- create cohorts")
-cdm$top_3_device_concepts <- conceptCohort(cdm,
-                                           conceptSet = cl,
-                                           name = "top_3_device_concepts",
-                                           exit = "event_start_date")
+cdm$dc <- conceptCohort(cdm,
+                        conceptSet = dc,
+                        name = "device_concepts",
+                        exit = "event_start_date")
+
 logMessage("- summarise characteristics")
-results[["chars_top_3"]] <- cdm$top_3_device_concepts |>
+results[["chars_dc"]] <- cdm$dc |>
   summariseCharacteristics()
 
 logMessage("- summarise lsc")
-results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
-  summariseLargeScaleCharacteristics(window = list(c(0, 0),
-                                                   c(-7, 7)),
+results[["chars_dc"]] <- cdm$dc |>
+  summariseLargeScaleCharacteristics(window = list(c(-7, 7)),
                                      eventInWindow = c("procedure_occurrence",
                                                        "condition_occurrence",
                                                        "drug_exposure"),
                                      minimumFrequency = 0.005)
-
-# logMessage("Procedure cohorts")
-# cdm$proc <- conceptCohort(cdm,
-#                           conceptSet = list(
-#                             hip_replacement = c(4144432, 4203771, 4146785,
-#                                                 44514773, 44514780, 44515507),
-#                             pacemaker = c(4184306, 44511205, 44511204, 4180293,
-#                                           4019139,4144921, 4180298,
-#                                           44790501, 44790298, 44790432)),
-#                           exit = "event_end_date",
-#                           name = "proc")
 
 
 logMessage("- export results")
