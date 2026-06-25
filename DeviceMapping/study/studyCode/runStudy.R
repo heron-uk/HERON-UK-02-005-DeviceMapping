@@ -21,10 +21,52 @@ logMessage("Table summary")
 results[["tbl_summary"]] <- summariseClinicalRecords(cdm = cdm,
                                                      omopTableName = "device_exposure")
 
-logMessage("Trend")
+logMessage("Trend - overall")
 results[["tbl_trend"]] <- summariseTrend(cdm = cdm,
                                          event = "device_exposure",
                                          interval = "years")
+
+mapped <- c(TRUE, FALSE)
+uid <-  c(TRUE, FALSE)
+for(i in seq_along(mapped)){
+  for(j in seq_along(uid)){
+
+    working_cdm <- cdm
+    working_mapped <- mapped[[i]]
+    working_uid<- uid[[j]]
+
+    cli::cli_inform("Trend - mapped {working_mapped} and uid {working_uid}")
+
+    if(isTRUE(working_mapped)){
+      # has mapping
+      working_cdm$device_exposure <- working_cdm$device_exposure |>
+        dplyr::filter(!is.na(device_concept_id) & device_concept_id != 0)
+    } else {
+      # not mapped
+      working_cdm$device_exposure <- working_cdm$device_exposure |>
+        dplyr::filter(is.na(device_concept_id) | device_concept_id == 0)
+    }
+
+    if(isTRUE(working_uid)){
+      # has uid
+      working_cdm$device_exposure <- working_cdm$device_exposure |>
+        dplyr::filter(!is.na(unique_device_id) & unique_device_id != "")
+    } else {
+      # no uid
+      working_cdm$device_exposure <- working_cdm$device_exposure |>
+        dplyr::filter(is.na(unique_device_id) | unique_device_id == "")
+    }
+
+    results[[paste0("tbl_trend", working_mapped, working_uid)]] <- summariseTrend(cdm = working_cdm,
+                                                                                  event = "device_exposure",
+                                                                                  interval = "years")
+    attr(results[[paste0("tbl_trend", working_mapped, working_uid)]],
+         "settings") <- attr(results[[paste0("tbl_trend", working_mapped, working_uid)]],
+                             "settings") |>
+      mutate(mapped_to_standard = working_mapped,
+             has_uid = working_uid)
+
+  }}
 
 # summary of UID
 logMessage("UID summary")
@@ -50,6 +92,7 @@ top_3_concepts <- cdm$device_exposure |>
            device_concept_id_name) |>
   tally() |>
   collect() |>
+  filter(device_concept_id != "0") |>
   arrange(desc(n)) |>
   slice_head(n = 3)
 
@@ -72,13 +115,10 @@ results[["chars_top_3"]] <- cdm$top_3_device_concepts |>
 
 logMessage("- summarise lsc")
 results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
-  summariseLargeScaleCharacteristics(window = list(c(0, 0)),
-                                     eventInWindow = c("procedure_occurrence"),
-                                     minimumFrequency = 0.005)
-results[["lsc_top_3"]] <- cdm$top_3_device_concepts |>
   summariseLargeScaleCharacteristics(window = list(c(0, 0),
                                                    c(-7, 7)),
-                                     eventInWindow = c("condition_occurrence",
+                                     eventInWindow = c("procedure_occurrence",
+                                                       "condition_occurrence",
                                                        "drug_exposure"),
                                      minimumFrequency = 0.005)
 

@@ -17,14 +17,90 @@ library(ggplot2)
 library(visOmopResults)
 library(flextable)
 library(tidyr)
+library(scales)
 
 res <- importSummarisedResult(here::here("rawData"))
+res |> 
+  mutate(cdm_name = if_else(cdm_name == "IDRIL_1", 
+                            "Lancs", cdm_name))|> 
+  mutate(cdm_name = if_else(cdm_name == "omop", 
+                            "Barts", cdm_name))
 ```
+
+## Snapshot
+
+```{r}
+visTable(res |> 
+           filterSettings(result_type == "summarise_omop_snapshot"), 
+         header = "cdm_name",groupColumn = "variable_name",
+         hide = c("result_id", "group_level", "group_name",
+                  "strata_name", "strata_level",
+                  "estimate_type",
+                  "variable_level",
+                  "additional_name",
+                  "additional_level"),
+         type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")
+```
+
+\newpage
 
 ## Summary of device exposure table
 
 ```{r}
-tableClinicalRecords(res, type = "flextable") |>
+visTable(res |> 
+           filterSettings(result_type == "summarise_clinical_records") |> 
+           filter_out(variable_name == "Number subjects" &
+                        estimate_name == "percentage") |> 
+           filter(variable_name %in% 
+                    c("Number subjects",
+                      "Number records",
+                      "Records per person")) |> 
+           mutate(variable_name = factor(variable_name, 
+                                         levels = c("Number subjects",
+                      "Number records",
+                      "Records per person"))) |> 
+           arrange(variable_name) |> 
+           mutate(variable_name = as.character(variable_name)), 
+         header = "cdm_name",groupColumn = "variable_name",
+         hide = c("result_id", "group_level", "group_name",
+                  "strata_name", "strata_level",
+                  "estimate_type",
+                  "variable_level",
+                  "additional_name",
+                  "additional_level"),
+         estimateName = c(
+                     "N" = "<count>",
+                     "Mean (SD)" = "<mean> (<sd>)",
+                     "Median (min, IQR, max)" = "<median> (<min>, <q25> to <q75>, <max>)"),
+         type = "flextable") |>
+  set_table_properties(width = 1, layout = "autofit")
+```
+
+\newpage
+
+## UDI and mapping to standard concept
+
+```{r}
+id_counts <- res |> 
+  filterSettings(result_type == "summarise_table") |> 
+  tidy() |> 
+  filter(!is.na(count)) |> 
+  filter(variable_name == "number records") |> 
+  mutate(standard_concept = if_else(is.na(device_concept_id) | device_concept_id == "0",
+                          "Unmapped",
+                          "Mapped")) |> 
+  mutate(has_udi = if_else(is.na(unique_device_id) | unique_device_id == "unknown",
+                             "No",
+                             "Yes"))
+
+id_counts |> 
+  summarise(records = sum(count), 
+            .by = c(cdm_name, standard_concept, has_udi)) |> 
+  mutate(percentage = scales::percent(records / sum(records), accuracy = 0.1)) |> 
+  arrange(cdm_name, desc(records)) |> 
+  mutate(records = scales::comma(records)) |> 
+  visTable(groupColumn = "cdm_name", type = "flextable") |>
   set_table_properties(width = 1, layout = "autofit")
 ```
 
@@ -33,69 +109,51 @@ tableClinicalRecords(res, type = "flextable") |>
 ## Trends in device records over time
 
 ```{r}
-plotTrend(res) + 
+plotTrend(res, colour = "cdm_name") + 
   ggtitle("Trend in device exposure records") +
-  ylim(c(0, NA))
+  ylim(c(0, NA))  +
+  scale_y_continuous(labels = scales::comma) +
+  facet_grid(cdm_name ~ ., 
+             scales = "free_y")
 ```
 
 \newpage
 
-## Device concept IDs
+## Device concept IDs - mapped
 
 ```{r}
-res |> 
-  filterSettings(result_type == "summarise_table") |> 
-  filterSettings(stringr::str_detect(group, "source")) |> 
-  tidy() |> 
-  filter(!is.na(count)) |> 
-  filter(variable_name == "number records") |> 
-  mutate(missing_uid = if_else(is.na(unique_device_id), "missing", "non_missing")) |> 
-  summarise(tot = sum(count),
-            .by = c(device_concept_id, device_concept_id_name, missing_uid)) |> 
-  pivot_wider(names_from = "missing_uid", values_from = "tot") |> 
-  dplyr::mutate(missing = replace_na(missing, 0),
-                non_missing = replace_na(non_missing, 0)) |> 
-  mutate(
-    number_of_records = missing + non_missing,
-    percentage_with_unique_identifier = paste0((non_missing / number_of_records)*100, "%")
-  )  |> 
-  select(device_concept_id, device_concept_id_name,
-         number_of_records, 
-         percentage_with_unique_identifier) |> 
-  arrange(desc(number_of_records)) |> 
-  visTable(type = "flextable") |>
+id_counts |> 
+  arrange(desc(count)) |>
+  mutate(count = scales::comma(count)) |> 
+  filter(device_concept_id != "0") |> 
+  visTable(groupColumn = c("cdm_name",
+                           "device_concept_id",
+                           "device_concept_id_name"),
+           type = "flextable", hide = c("variable_name", "variable_level",
+                                        "standard_concept", "has_udi")) |>
   set_table_properties(width = 1, layout = "autofit")
 ```
 
 \newpage
 
-## Unique identifiers per device concept ID
+## Device concept IDs - unmapped
 
 ```{r}
-uid <- res |> 
-  filterSettings(result_type == "summarise_table") |> 
-  filterSettings(stringr::str_detect(group, "source")) |> 
-  tidy() |> 
-  filter(!is.na(unique_device_id)) |> 
-  filter(!is.na(count)) |> 
-  filter(variable_name == "number records") |> 
-  arrange(desc(count))
-
-uid |> 
-  # filter(device_concept_id == "45758380") |> 
-  arrange(desc(count)) |> 
-  select(device_concept_id, device_concept_id_name,
-         unique_device_id,
-         device_source_value, count) |> 
-  visTable(groupColumn = c("device_concept_id_name", "device_concept_id"), 
-           type = "flextable") |>
+id_counts |> 
+  arrange(desc(count)) |>
+  mutate(count = scales::comma(count)) |> 
+  filter(device_concept_id == "0") |> 
+  visTable(groupColumn = c("cdm_name",
+                           "device_concept_id",
+                           "device_concept_id_name"),
+           type = "flextable", hide = c("variable_name", "variable_level",
+                                        "standard_concept", "has_udi")) |>
   set_table_properties(width = 1, layout = "autofit")
-
 ```
 
 \newpage
 
-## Characterisation of top 10 devices
+## Characterisation of top 3 devices
 
 ```{r}
 c_order <- res |> 
@@ -119,16 +177,16 @@ res |>
 \newpage
 
 ```{r}
-res |> 
-  filterSettings(table_name == "procedure_occurrence") |> 
-  filter(variable_level == "0 to 0") |> 
-  mutate(group_level = factor(group_level, levels = c_order)) |> 
-  arrange(group_level) |> 
-  mutate(group_level = as.character(group_level)) |> 
-  tableTopLargeScaleCharacteristics(, 
-           type = "flextable") |>
-  set_table_properties(width = 1, layout = "autofit")|>
-  set_caption(caption = "Most common procedure codes seen on same day as device exposure")
+# res |> 
+#   filterSettings(table_name == "procedure_occurrence") |> 
+#   filter(variable_level == "-7 to 7") |> 
+#   mutate(group_level = factor(group_level, levels = c_order)) |> 
+#   arrange(group_level) |> 
+#   mutate(group_level = as.character(group_level)) |> 
+#   tableTopLargeScaleCharacteristics(, 
+#            type = "flextable") |>
+#   set_table_properties(width = 1, layout = "autofit")|>
+#   set_caption(caption = "Most common procedure codes seen on same day as device exposure")
 ```
 
 \newpage
