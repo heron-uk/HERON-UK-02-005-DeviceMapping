@@ -130,12 +130,16 @@ cdm$dc <- conceptCohort(cdm,
                         name = "dc",
                         exit = "event_start_date")
 
+logMessage("- summarise attrition")
+results[["attr_dc"]] <- cdm$dc |>
+  summariseCohortAttrition()
+
 logMessage("- summarise characteristics")
 results[["chars_dc"]] <- cdm$dc |>
   summariseCharacteristics()
 
 logMessage("- summarise lsc")
-results[["chars_dc"]] <- cdm$dc |>
+results[["lsc_dc"]] <- cdm$dc |>
   summariseLargeScaleCharacteristics(window = list(c(-7, 7)),
                                      eventInWindow = c("procedure_occurrence",
                                                        "condition_occurrence",
