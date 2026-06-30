@@ -15,6 +15,7 @@ logMessage("LOG CREATED")
 # Initialise list to store results as we go -----
 results <- list()
 
+# general summary ----
 results[["snapshot"]] <- summariseOmopSnapshot(cdm)
 
 logMessage("Table summary")
@@ -68,7 +69,7 @@ for(i in seq_along(mapped)){
 
   }}
 
-# summary of UID
+# summary of UID -----
 logMessage("UID summary")
 results[["uid_standard_source"]] <- cdm$device_exposure |>
   mutate(year = clock::get_year(device_exposure_start_date),
@@ -83,60 +84,57 @@ results[["uid_standard_source"]] <- cdm$device_exposure |>
                             "device_concept_id_name",
                             "unique_device_id"))
 
-
+# case studies -----
 logMessage("Characterise top selected standard device concepts")
 device_concepts <- c(
 # opthamology - lens
 45758993, # Posterior-chamber intraocular lens, pseudophakic
 45758380, # Anterior-chamber intraocular lens, pseudophakic
-# cardiology - valve replacement
-3661561, # Aortic valve bioprosthesis
-3661562, # Mitral valve bioprosthesis
 # cardiology - pacemaker
-4231009, # Cardiac pacemaker electrode
 45772840, # Implantable cardiac pacemaker
 2615795, # Pacemaker, dual chamber, rate-responsive (implantable)
 2615796, # Pacemaker, single chamber, rate-responsive (implantable)
-# repiratory
-45762420, # Endobronchial valve
 # orthopedic
-46273109, # Femoral stem centralizer
 45761725, # Ceramic femoral head prosthesis
-45761793, # Acetabular shell
-45760907, # Uncoated knee tibia prosthesis, polyethene
-45763037, # Bipolar femoral head prosthesis
-45760762, # Uncoated hip femur prosthesis, modular
-45761165, # Uncoated knee tibia prosthesis, metallic
-45758713, # Metallic femoral head prosthesis
-45758465, # Polyethylene patella prosthesis
-45772469, # Coated hip femur prosthesis, modular
-45760486, # Uncoated femoral stem prosthesis, modular
-45768074, # Knee tibia prosthesis
-45761776, # Coated femoral stem prosthesis, modular
-45771801, # Uncoated knee femur prosthesis
-# mesh
-45768044, # Surgical mesh
-4223318, # Mesh
-45765017 # Pelvic organ prolapse surgical mesh, composite
+45758713 # Metallic femoral head prosthesis
 )
 
 dc <- device_concepts |>
   as.list()
 names(dc) <- paste0("concept_", dc)
 
-logMessage("- create cohorts")
+logMessage("- create device cohorts")
 cdm$dc <- conceptCohort(cdm,
                         conceptSet = dc,
                         name = "dc",
                         exit = "event_start_date")
 
+logMessage("- create table one cohorts")
+table_1_codes <- importCodelist(here::here("codelists"), type = "csv")
+cdm$table_1_cohorts <- conceptCohort(cdm,
+                                     conceptSet = table_1_codes,
+                                     name = "table_1_cohorts",
+                                     exit = "event_start_date")
+
 logMessage("- summarise attrition")
 results[["attr_dc"]] <- cdm$dc |>
   summariseCohortAttrition()
+results[["attr_t1"]] <- cdm$table_1_cohorts |>
+  summariseCohortAttrition()
+
+logMessage("- summarise code use")
+results[["code_use_dc"]] <- cdm$dc |>
+  CodelistGenerator::summariseCohortCodeUse()
+results[["code_use_t1"]] <- cdm$table_1_cohorts |>
+  CodelistGenerator::summariseCohortCodeUse()
 
 logMessage("- summarise characteristics")
 results[["chars_dc"]] <- cdm$dc |>
-  summariseCharacteristics()
+  summariseCharacteristics(
+    cohortIntersectFlag = list(
+      targetCohortTable = "table_1_cohorts",
+      window = c(-7, 7)
+    ))
 
 logMessage("- summarise lsc")
 results[["lsc_dc"]] <- cdm$dc |>
