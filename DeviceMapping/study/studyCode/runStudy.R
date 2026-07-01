@@ -28,15 +28,15 @@ results[["tbl_trend"]] <- summariseTrend(cdm = cdm,
                                          interval = "years")
 
 mapped <- c(TRUE, FALSE)
-uid <-  c(TRUE, FALSE)
+udi <-  c(TRUE, FALSE)
 for(i in seq_along(mapped)){
-  for(j in seq_along(uid)){
+  for(j in seq_along(udi)){
 
     working_cdm <- cdm
     working_mapped <- mapped[[i]]
-    working_uid<- uid[[j]]
+    working_udi<- udi[[j]]
 
-    cli::cli_inform("Trend - mapped {working_mapped} and uid {working_uid}")
+    cli::cli_inform("Trend - mapped {working_mapped} and udi {working_udi}")
 
     if(isTRUE(working_mapped)){
       # has mapping
@@ -48,30 +48,30 @@ for(i in seq_along(mapped)){
         dplyr::filter(is.na(device_concept_id) | device_concept_id == 0)
     }
 
-    if(isTRUE(working_uid)){
-      # has uid
+    if(isTRUE(working_udi)){
+      # has udi
       working_cdm$device_exposure <- working_cdm$device_exposure |>
         dplyr::filter(!is.na(unique_device_id) & unique_device_id != "")
     } else {
-      # no uid
+      # no udi
       working_cdm$device_exposure <- working_cdm$device_exposure |>
         dplyr::filter(is.na(unique_device_id) | unique_device_id == "")
     }
 
-    results[[paste0("tbl_trend", working_mapped, working_uid)]] <- summariseTrend(cdm = working_cdm,
+    results[[paste0("tbl_trend", working_mapped, working_udi)]] <- summariseTrend(cdm = working_cdm,
                                                                                   event = "device_exposure",
                                                                                   interval = "years")
-    attr(results[[paste0("tbl_trend", working_mapped, working_uid)]],
-         "settings") <- attr(results[[paste0("tbl_trend", working_mapped, working_uid)]],
+    attr(results[[paste0("tbl_trend", working_mapped, working_udi)]],
+         "settings") <- attr(results[[paste0("tbl_trend", working_mapped, working_udi)]],
                              "settings") |>
       mutate(mapped_to_standard = working_mapped,
-             has_uid = working_uid)
+             has_udi = working_udi)
 
   }}
 
-# summary of UID -----
-logMessage("UID summary")
-results[["uid_standard_source"]] <- cdm$device_exposure |>
+# summary of udi -----
+logMessage("udi summary")
+results[["udi_standard_source"]] <- cdm$device_exposure |>
   mutate(year = clock::get_year(device_exposure_start_date),
          # to ensure they don't get silently ignored
          device_concept_id = dplyr::coalesce(device_concept_id, 0L),
@@ -111,7 +111,7 @@ cdm$dc <- conceptCohort(cdm,
 
 
 # add unique identifiers - may have more than one
-cdm$uid <- cdm$dc |>
+cdm$udi <- cdm$dc |>
   dplyr::inner_join(
     cdm$device_exposure |>
   dplyr::filter(device_concept_id %in%
@@ -121,23 +121,23 @@ cdm$uid <- cdm$dc |>
                 "unique_device_id") |>
   dplyr::mutate(unique_device_id = if_else(is.na(unique_device_id), "unknown",
                                            unique_device_id)) |>
-  dplyr::mutate(unique_device_id = paste0("uid_", unique_device_id)),
+  dplyr::mutate(unique_device_id = paste0("udi_", unique_device_id)),
   by = c("subject_id",
          "cohort_start_date")) |>
   dplyr::select("subject_id", "cohort_start_date", "unique_device_id") |>
-  dplyr::compute(name = "uid")
+  dplyr::compute(name = "udi")
 
-cdm$uid <- cdm$uid |>
+cdm$udi <- cdm$udi |>
   dplyr::mutate(flag = "Yes") |>
   tidyr::pivot_wider(names_from = "unique_device_id",
                      values_from = "flag") |>
-  dplyr::compute(name = "uid")
+  dplyr::compute(name = "udi")
 
-newCols <- colnames(cdm$uid)[!colnames(cdm$uid) %in%
+newCols <- colnames(cdm$udi)[!colnames(cdm$udi) %in%
                                c("subject_id", "cohort_start_date")]
 
 cdm$dc <- cdm$dc |>
-  dplyr::left_join(cdm$uid,
+  dplyr::left_join(cdm$udi,
                    by = c("subject_id",
                           "cohort_start_date"))
 cdm$dc <- cdm$dc |>
