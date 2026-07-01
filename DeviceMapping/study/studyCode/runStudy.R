@@ -109,6 +109,39 @@ cdm$dc <- conceptCohort(cdm,
                         name = "dc",
                         exit = "event_start_date")
 
+
+# add unique identifiers - may have more than one
+cdm$uid <- cdm$dc |>
+  dplyr::inner_join(
+    cdm$device_exposure |>
+  dplyr::filter(device_concept_id %in%
+                  !!dc |> unlist()) |>
+  dplyr::select("subject_id"="person_id",
+                "cohort_start_date" = "device_exposure_start_date",
+                "unique_device_id") |>
+  dplyr::mutate(unique_device_id = paste0("uid_", unique_device_id)),
+  by = c("subject_id",
+         "cohort_start_date")) |>
+  dplyr::select("subject_id", "cohort_start_date", "unique_device_id") |>
+  dplyr::compute(name = "uid")
+
+cdm$uid <- cdm$uid |>
+  dplyr::mutate(flag = "Yes") |>
+  tidyr::pivot_wider(names_from = "unique_device_id",
+                     values_from = "flag") |>
+  dplyr::compute(name = "uid")
+
+newCols <- colnames(cdm$uid)[!colnames(cdm$uid) %in%
+                               c("subject_id", "cohort_start_date")]
+
+cdm$dc <- cdm$dc |>
+  dplyr::left_join(cdm$uid,
+                   by = c("subject_id",
+                          "cohort_start_date"))
+cdm$dc <- cdm$dc |>
+  omopgenerics::newCohortTable()
+
+
 logMessage("- create table one cohorts")
 table_1_codes <- importCodelist(here::here("codelists"), type = "csv")
 cdm$table_1_cohorts <- conceptCohort(cdm,
@@ -123,10 +156,8 @@ results[["attr_t1"]] <- cdm$table_1_cohorts |>
   summariseCohortAttrition()
 
 logMessage("- summarise code use")
-results[["code_use_dc"]] <- cdm$dc |>
-  CodelistGenerator::summariseCohortCodeUse()
-results[["code_use_t1"]] <- cdm$table_1_cohorts |>
-  CodelistGenerator::summariseCohortCodeUse()
+results[["code_use_dc"]] <- CodelistGenerator::summariseCohortCodeUse(cdm, "dc")
+results[["code_use_t1"]] <- CodelistGenerator::summariseCohortCodeUse(cdm, "table_1_cohorts")
 
 logMessage("- summarise characteristics")
 results[["chars_dc"]] <- cdm$dc |>
@@ -134,7 +165,8 @@ results[["chars_dc"]] <- cdm$dc |>
     cohortIntersectFlag = list(
       targetCohortTable = "table_1_cohorts",
       window = c(-7, 7)
-    ))
+    ),
+    otherVariables = newCols)
 
 logMessage("- summarise lsc")
 results[["lsc_dc"]] <- cdm$dc |>
