@@ -119,6 +119,8 @@ cdm$uid <- cdm$dc |>
   dplyr::select("subject_id"="person_id",
                 "cohort_start_date" = "device_exposure_start_date",
                 "unique_device_id") |>
+  dplyr::mutate(unique_device_id = if_else(is.na(unique_device_id), "unknown",
+                                           unique_device_id)) |>
   dplyr::mutate(unique_device_id = paste0("uid_", unique_device_id)),
   by = c("subject_id",
          "cohort_start_date")) |>
