@@ -171,17 +171,23 @@ logMessage("- summarise characteristics")
 results[["chars_dc"]] <- cdm$dc |>
   summariseCharacteristics(
     cohortIntersectFlag = list(
+      list(
       targetCohortTable = "table_1_cohorts",
-      window = c(-7, 7)
-    ),
+      window = c(-7, 7)),
+      list(
+        targetCohortTable = "table_1_cohorts",
+        window = c(-Inf, 7))
+      ),
     otherVariables = newCols)
 
 logMessage("- summarise lsc")
 results[["lsc_dc"]] <- cdm$dc |>
-  summariseLargeScaleCharacteristics(window = list(c(-7, 7)),
+  summariseLargeScaleCharacteristics(window = list(c(-7, 7),
+                                                   c(-Inf, 7)),
                                      eventInWindow = c("procedure_occurrence",
                                                        "condition_occurrence",
-                                                       "drug_exposure"),
+                                                       "drug_exposure",
+                                                       "observation"),
                                      minimumFrequency = 0.005)
 
 
