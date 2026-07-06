@@ -87,6 +87,12 @@ results[["udi_standard_source"]] <- cdm$device_exposure |>
 # case studies -----
 logMessage("Characterise top selected standard device concepts")
 device_concepts <- c(
+# diabetes - Continuous Glucose Monitors
+35889967, # Freestyle libre 2 sensor
+888893, # Freestyle libre 2 plus sensor
+40677414, # Freestyle libre sensor
+886971, # Dexcom one+ sensor
+36964253, # Dexcom one sensor
 # opthamology - lens
 45758993, # Posterior-chamber intraocular lens, pseudophakic
 45758380, # Anterior-chamber intraocular lens, pseudophakic
