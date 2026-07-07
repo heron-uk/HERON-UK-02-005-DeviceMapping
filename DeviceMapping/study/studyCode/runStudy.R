@@ -87,12 +87,6 @@ results[["udi_standard_source"]] <- cdm$device_exposure |>
 # case studies -----
 logMessage("Characterise top selected standard device concepts")
 device_concepts <- c(
-# diabetes - Continuous Glucose Monitors
-35889967, # Freestyle libre 2 sensor
-888893, # Freestyle libre 2 plus sensor
-40677414, # Freestyle libre sensor
-886971, # Dexcom one+ sensor
-36964253, # Dexcom one sensor
 # opthamology - lens
 45758993, # Posterior-chamber intraocular lens, pseudophakic
 45758380, # Anterior-chamber intraocular lens, pseudophakic
@@ -100,6 +94,10 @@ device_concepts <- c(
 45772840, # Implantable cardiac pacemaker
 2615795, # Pacemaker, dual chamber, rate-responsive (implantable)
 2615796, # Pacemaker, single chamber, rate-responsive (implantable)
+# cardiology - icd
+37164898, # Subcutaneous implantable cardioverter defibrillator
+45771731, # Single-chamber implantable defibrillator
+45771922, # Dual-chamber implantable defibrillator
 # orthopedic
 45761725, # Ceramic femoral head prosthesis
 45758713 # Metallic femoral head prosthesis
@@ -171,12 +169,8 @@ logMessage("- summarise characteristics")
 results[["chars_dc"]] <- cdm$dc |>
   summariseCharacteristics(
     cohortIntersectFlag = list(
-      list(
       targetCohortTable = "table_1_cohorts",
-      window = c(-7, 7)),
-      list(
-        targetCohortTable = "table_1_cohorts",
-        window = c(-Inf, 7))
+      window = c(-7, 7)
       ),
     otherVariables = newCols)
 
