@@ -13,6 +13,8 @@ library(CohortCharacteristics)
 library(CodelistGenerator)
 library(odbc)
 library(RPostgres)
+library(CohortConstructor)
+
 
 # database metadata and connection details
 # The name/ acronym for the database

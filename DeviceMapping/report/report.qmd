@@ -1,0 +1,476 @@
+---
+title: "Device Characterisation Mapping"
+format:
+  docx:
+    fig-cap-location: top
+execute:
+  echo: false
+  message: false
+  warning: false
+editor: 
+  markdown: 
+    wrap: 72
+filters:
+  - docx-landscape.lua
+---
+
+```{r}
+# Global options ----
+knitr::opts_chunk$set(
+  warning = FALSE, 
+  message = FALSE,
+  out.width  = "95%",  # figures occupy ~95% of document width
+  out.height = "auto",
+  dpi        = 320,    # ensure figure quality
+  fig.width  = 10,      # default aspect ratio (can be overridden per-figure)
+  fig.height = 9,
+  results    = "asis"  # enable Markdown produced via cat() inside chunks
+)
+```
+
+```{r}
+# Load necessary packages ----
+library(visOmopResults)
+library(CohortCharacteristics)
+library(dplyr)
+library(tidyr)
+library(IncidencePrevalence)
+library(purrr)
+library(here)
+library(omopgenerics)
+library(stringr)
+library(ggplot2)
+library(visOmopResults)
+library(forcats)
+library(scales)
+library(glue)
+library(CohortSurvival)
+library(readr)
+```
+
+```{r}
+# DARWIN style for visOmopResults plots and tables.
+style <- NULL
+tableType <- "flextable"
+plotType  <- "ggplot"
+setGlobalPlotOptions(style = style, type = plotType) 
+setGlobalTableOptions(style = style, type = tableType)
+source(here("functions.R"))
+# Load the data
+data <- read_csv()
+# load(here("..", "postprocessing", "results", "results_v2.csv"))
+```
+
+Table 1. Number of individuals with polyendocrine metabolic ovarian syndrome (PMOS) during the study period, by study objective and data source 
+```{r}
+data$incidence_attrition |>
+  filterSettings(denominator_age_group == "10 to 150") |>
+  filterGroup(outcome_cohort_name == "pmos") |>
+  filter(variable_name == "number_subjects") |>
+  filter(strata_level %in% c("Apply washout - anyone with outcome prior to start excluded")) |>
+  tidy() |>
+  select("cdm_name", "reason", "variable_name", "estimate_value" = "count") |>
+  mutate("reason" = "Total number of eligible population",
+         "Study objective" = "-", 
+         "additional_requirement" = "-",
+         "estimate_type" = "integer",
+         "estimate_name" = "count") |>
+  rbind(
+    data$summarise_cohort_attrition |>
+      filter(variable_name == "number_subjects") |>
+      arrange(as.numeric(additional_level), cdm_name) |>
+      tidy() |>
+      mutate("estimate_value" = as.numeric(count)) |>
+      select(-c("count", "age_range", "cdm_version", "cohort_definition_id",
+                "min_prior_observation", "sex", "cohort_name")) |>
+      filter(table_name == "pmos_1", reason_id == max(as.numeric(reason_id))) |>
+      select("cdm_name", "reason", "variable_name", "estimate_value") |>
+      mutate("reason" = "Total number of individuals with PMOS",
+             "Study objective" = "Comorbidities Characterisation and Incidence", 
+             "additional_requirement" = "Restrict to first PMOS diagnosis",
+             "estimate_type" = "integer",
+             "estimate_name" = "count") 
+  ) |>
+  rbind(
+    data$summarise_cohort_attrition |>
+      filter(variable_name == "number_subjects") |>
+      arrange(as.numeric(additional_level), cdm_name) |>
+      tidy() |>
+      mutate("estimate_value" = as.numeric(count)) |>
+      select(-c("count", "age_range", "cdm_version", "cohort_definition_id",
+                "min_prior_observation", "sex", "cohort_name")) |>
+      filter(table_name == "pmos_2", reason_id == max(as.numeric(reason_id))) |>
+      select("cdm_name", "reason", "variable_name", "estimate_value") |>
+      mutate("reason" = "Total number of individuals with PMOS",
+             "Study objective" = "Drug Characterisation", 
+             "additional_requirement" = "Full year of future contribution of individual",
+             "estimate_type" = "integer",
+             "estimate_name" = "count") 
+  ) |>
+  mutate("cdm_name" = factor(cdm_name, levels = c("DK-DHR", "FinOMOP-THL", "SIDIAP", "IPCI", "CPRD GOLD"))) |>
+  arrange(cdm_name) |>
+  visTable(header = "cdm_name",
+           hide = c("cohort_name", "variable_name", "variable_level",
+                    "reason_id", "table_name", "estimate_name", 
+                    "vocabulary_version", "estimate_type"))
+```
+\newpage
+
+Table 2. Characterisation of polyendocrine metabolic ovarian syndrome (PMOS) individuals on 
+comorbidities
+```{r}
+t <- data$summarise_characteristics |>
+  filterSettings(table_name == "pmos_1",
+                 strata == "age_group") |> 
+  filterStrata(age_group == "overall") |>
+  filter(! c(estimate_name %in% c("min", "q25", "median", "q75", "max", "mean", "sd") &
+               !variable_name %in% c("Age"))) |>
+  splitAdditional() |>
+  mutate("table_type" = if_else(
+    !variable_name %in% c("Cardiometabolic/vascular comorbidities",
+                          "Hyperandrogenic/reproductive comorbidities",
+                          "Mental health"),
+    "Demographic characteristics",
+    variable_name)) |>
+  mutate("variable_name" = if_else(
+    variable_name %in% c("Cardiometabolic/vascular comorbidities",
+                         "Hyperandrogenic/reproductive comorbidities",
+                         "Mental health"),
+    variable_level,
+    variable_name
+  )) |>
+  mutate("variable_level" = if_else(
+    variable_level %in% c("-", c("10-17", "18-29", "30-39", "40-49", "≥50")),
+    variable_level,
+    "_"
+  )) |>
+  uniteAdditional("table_type") |>
+  filter(!variable_name %in% c("Number records", "Cohort start date",
+                               "Cohort end date",
+                               "Sex", "Prior observation", "Future observation",
+                               "Days in cohort", "Days to next record")) |>
+  filter(!(variable_name %in% "Age" & estimate_name %in% c("mean", "sd"))) |>
+  mutate(variable_name = case_when(
+    variable_name == "T2d" ~ "Type 2 diabetes",
+    variable_name == "Vte" ~ "VTE",
+    variable_name == "Mdsld" ~ "Metabolic dysfunction-associated steatotic liver disease",
+    .default = variable_name
+  )) 
+
+
+t |>
+  mutate("additional_level" = factor(additional_level, levels = c("Demographic characteristics",
+                                                                  "Cardiometabolic/vascular comorbidities",
+                                                                  "Hyperandrogenic/reproductive comorbidities",
+                                                                  "Mental health"))) |>
+  mutate("variable_name" = factor(variable_name, levels = c("Number subjects", "Age", "Age group", 
+                                                            sort(unique(t$variable_name[!t$additional_level %in% "Demographic characteristics"]))))) |>
+  mutate("cdm_name" = factor(cdm_name, levels = c("DK-DHR", "FinOMOP-THL", "SIDIAP", "IPCI", "CPRD GOLD"))) |>
+  arrange(cdm_name, additional_level, variable_name) |>
+  visOmopTable(
+    estimateName = c(
+      "N (%)" = "<count> (<percentage>)",
+      "N" = "<count>",
+      "Median [Q25 - Q75]" = "<median> [<q25> - <q75>]",
+      "Range" = "<min>, <max>"
+    ),
+    .options = list("decimals" = c("numeric" = 0, "integer" = 0, "percentage" = 2)), 
+    hide = c("age_group", "table_name", "cohort_name"), 
+    groupColumn = "table_type",
+    header = "cdm_name"
+  )
+```
+
+\newpage
+Table 3. Characterisation of polyendocrine metabolic ovarian syndrome (PMOS) individuals on 
+comorbidities, stratified by age group
+```{r}
+t <- data$summarise_characteristics |>
+  filterSettings(table_name == "pmos_1",
+                 strata == "age_group") |> 
+  filterStrata(age_group != "overall") |>
+  filter(! c(estimate_name %in% c("min", "q25", "median", "q75", "max", "mean", "sd") &
+               !variable_name %in% c("Age"))) |>
+  splitAdditional() |>
+  mutate("table_type" = if_else(
+    !variable_name %in% c("Cardiometabolic/vascular comorbidities",
+                          "Hyperandrogenic/reproductive comorbidities",
+                          "Mental health"),
+    "Demographic characteristics",
+    variable_name)) |>
+  mutate("variable_name" = if_else(
+    variable_name %in% c("Cardiometabolic/vascular comorbidities",
+                         "Hyperandrogenic/reproductive comorbidities",
+                         "Mental health"),
+    variable_level,
+    variable_name
+  )) |>
+  mutate("variable_level" = if_else(
+    variable_level %in% c("-", c("10-17", "18-29", "30-39", "40-49", "≥50")),
+    variable_level,
+    "_"
+  )) |>
+  uniteAdditional("table_type") |>
+  filter(!variable_name %in% c("Number records", "Cohort start date",
+                               "Cohort end date", "Age group",
+                               "Sex", "Prior observation", "Future observation",
+                               "Days in cohort", "Days to next record")) |>
+  filter(!(variable_name %in% "Age" & estimate_name %in% c("mean", "sd"))) |>
+  mutate(variable_name = case_when(
+    variable_name == "T2d" ~ "Type 2 diabetes",
+    variable_name == "Vte" ~ "VTE",
+    variable_name == "Mdsld" ~ "Metabolic dysfunction-associated steatotic liver disease",
+    .default = variable_name
+  )) 
+
+
+t |>
+  mutate("additional_level" = factor(additional_level, levels = c("Demographic characteristics",
+                                                                  "Cardiometabolic/vascular comorbidities",
+                                                                  "Hyperandrogenic/reproductive comorbidities",
+                                                                  "Mental health"))) |>
+  mutate("variable_name" = factor(variable_name, levels = c("Number subjects", "Age", "Age group", 
+                                                            sort(unique(t$variable_name[!t$additional_level %in% "Demographic characteristics"]))))) |>
+  mutate("cdm_name" = factor(cdm_name, levels = c("DK-DHR", "FinOMOP-THL", "SIDIAP", "IPCI", "CPRD GOLD"))) |>
+  arrange(cdm_name, strata_level, additional_level, variable_name) |>
+  visOmopTable(
+    estimateName = c(
+      "N (%)" = "<count> (<percentage>)",
+      "N" = "<count>",
+      "Median [Q25 - Q75]" = "<median> [<q25> - <q75>]",
+      "Range" = "<min>, <max>"
+    ),
+    .options = list("decimals" = c("numeric" = 0, "integer" = 0, "percentage" = 2)), 
+    hide = c("table_name", "cohort_name"), 
+    groupColumn = c("age_group", "table_type"),
+    header = "cdm_name"
+  )
+```
+
+\newpage
+Table 4. Characterisation of polyendocrine metabolic ovarian syndrome (PMOS) individuals on non-infertility drug treatments
+```{r}
+t <- data$summarise_characteristics |>
+  filterSettings(table_name == "pmos_2") |>
+  filterStrata(age_group == "overall") |>
+  filter(!c(estimate_name %in% c("min", "q25", "median", "q75", "max", "mean", "sd") &
+              !variable_name %in% c("Age"))) |>
+  splitAdditional() |>
+  mutate("table_type" = if_else(
+    !variable_name %in% c("Non-infertility treatments (30 days after index date)",
+                          "Non-infertility treatments (31 to 365 days after index date)"),
+    "Demographic characteristics",
+    variable_name)) |>
+  mutate("variable_name" = if_else(
+    variable_name %in% c("Non-infertility treatments (30 days after index date)",
+                         "Non-infertility treatments (31 to 365 days after index date)"),
+    variable_level,
+    variable_name
+  )) |>
+  mutate("variable_level" = if_else(
+    variable_level %in% c("-", c("10-17", "18-29", "30-39", "40-49", "≥50")),
+    variable_level,
+    "_"
+  )) |> 
+  uniteAdditional("table_type") |>
+  filter(!variable_name %in% c("Number records", "Cohort start date",
+                               "Cohort end date",
+                               "Sex", "Prior observation", "Future observation",
+                               "Days in cohort", "Days to next record")) |>
+  filter(!(variable_name %in% "Age" & estimate_name %in% c("mean", "sd"))) 
+
+
+t |>
+  mutate("additional_level" = factor(additional_level, levels = c("Demographic characteristics",
+                                                                  "Non-infertility treatments (30 days after index date)",
+                                                                  "Non-infertility treatments (31 to 365 days after index date)"))) |>
+  mutate("variable_name" = factor(variable_name, levels = c("Number subjects", "Age", "Age group", 
+                                                            sort(unique(t$variable_name[!t$additional_level %in% "Demographic characteristics"]))))) |>
+  filter(!is.na(variable_name)) |>
+  mutate("cdm_name" = factor(cdm_name, levels = c("DK-DHR", "FinOMOP-THL", "SIDIAP", "IPCI", "CPRD GOLD"))) |>
+  arrange(cdm_name, strata_level, additional_level, variable_name) |>
+  visOmopTable(
+    estimateName = c(
+      "N (%)" = "<count> (<percentage>)",
+      "N" = "<count>",
+      "Median [Q25 - Q75]" = "<median> [<q25> - <q75>]",
+      "Range" = "<min>, <max>"
+    ),
+    .options = list("decimals" = c("numeric" = 0, "integer" = 0, "percentage" = 2)), 
+    hide = c("age_group", "table_name", "cohort_name"), 
+    groupColumn = c("table_type"),
+    header = "cdm_name"
+  )
+```
+
+\newpage
+Table 5. Characterisation of polyendocrine metabolic ovarian syndrome (PMOS) individuals on non-infertility drug treatments, stratified by age group.
+```{r}
+t <- data$summarise_characteristics |>
+  filterSettings(table_name == "pmos_2") |>
+  filterStrata(age_group != "overall") |>
+  filter(!c(estimate_name %in% c("min", "q25", "median", "q75", "max", "mean", "sd") &
+              !variable_name %in% c("Age"))) |>
+  splitAdditional() |>
+  mutate("table_type" = if_else(
+    !variable_name %in% c("Non-infertility treatments (30 days after index date)",
+                          "Non-infertility treatments (31 to 365 days after index date)"),
+    "Demographic characteristics",
+    variable_name)) |>
+  mutate("variable_name" = if_else(
+    variable_name %in% c("Non-infertility treatments (30 days after index date)",
+                         "Non-infertility treatments (31 to 365 days after index date)"),
+    variable_level,
+    variable_name
+  )) |>
+  mutate("variable_level" = if_else(
+    variable_level %in% c("-", c("10-17", "18-29", "30-39", "40-49", "≥50")),
+    variable_level,
+    "_"
+  )) |> 
+  uniteAdditional("table_type") |>
+  filter(!variable_name %in% c("Number records", "Cohort start date",
+                               "Cohort end date",
+                               "Sex", "Prior observation", "Future observation",
+                               "Days in cohort", "Days to next record")) |>
+  filter(!(variable_name %in% "Age" & estimate_name %in% c("mean", "sd"))) 
+
+
+t |>
+  mutate("additional_level" = factor(additional_level, levels = c("Demographic characteristics",
+                                                                  "Non-infertility treatments (30 days after index date)",
+                                                                  "Non-infertility treatments (31 to 365 days after index date)"))) |>
+  mutate("variable_name" = factor(variable_name, levels = c("Number subjects", "Age", "Age group", 
+                                                            sort(unique(t$variable_name[!t$additional_level %in% "Demographic characteristics"]))))) |>
+  filter(!is.na(variable_name)) |>
+  mutate("cdm_name" = factor(cdm_name, levels = c("DK-DHR", "FinOMOP-THL", "SIDIAP", "IPCI", "CPRD GOLD"))) |>
+  arrange(cdm_name, strata_level, additional_level, variable_name) |>
+  visOmopTable(
+    estimateName = c(
+      "N (%)" = "<count> (<percentage>)",
+      "N" = "<count>",
+      "Median [Q25 - Q75]" = "<median> [<q25> - <q75>]",
+      "Range" = "<min>, <max>"
+    ),
+    .options = list("decimals" = c("numeric" = 0, "integer" = 0, "percentage" = 2)), 
+    hide = c("table_name", "cohort_name"), 
+    groupColumn = c("age_group", "table_type"),
+    header = "cdm_name"
+  )
+
+```
+
+\newpage
+Figure 1. Annual incidence of recorded polyendocrine metabolic ovarian syndrome (PMOS) diagnosis, overall and stratified by age group
+```{r}
+j <- 1
+p <- getIncidencePlot(data$incidence, outcome = "pmos")
+print(p)
+j <- j + 1
+```
+
+```{r}
+#| output: asis
+# Annual incidence of health outcomes in polyendocrine metabolic ovarian syndrome (PMOS) individuals, overall and stratified by age group.
+i_names <- data$incidence |> 
+  splitGroup() |> 
+  distinct(outcome_cohort_name) |> 
+  filter(outcome_cohort_name != "pmos") |> 
+  pull("outcome_cohort_name")
+
+for(i in i_names) {
+  cat(glue("\n\n\\newpage\n\nFigure {j}. Annual incidence of {gsub('_outcome', '', i)} in polyendocrine metabolic ovarian syndrome (PMOS) individuals, overall and stratified by age group. \n\n"))
+  p <- getIncidencePlot(data$incidence, outcome = i)
+  print(p)
+  j <- j + 1
+}
+
+```
+
+```{r}
+#| output: asis
+# Figure 10–17. 5-year cumulative incidence of health outcomes in polyendocrine metabolic ovarian syndrome (PMOS) individuals, overall and stratified by age.
+for(i in unique(data$survival$variable_level)) {
+  
+  cat(glue("\n\n\\newpage\n\nFigure {j}. 5-year cumulative incidence of {gsub('_outcome', '', i)} in polyendocrine metabolic ovarian syndrome (PMOS) individuals, overall and stratified by age. \n\n"))
+  p <- getSurvivalPlot(data$survival, outcome = i, years = 5)
+  print(p)
+  j <- j + 1
+}
+```
+
+```{r}
+#| output: asis
+# Figure 10–17. 5-year cumulative incidence of health outcomes in polyendocrine metabolic ovarian syndrome (PMOS) individuals, overall and stratified by age.
+for(i in unique(data$survival$variable_level)) {
+  cat(glue("\n\n\\newpage\n\nFigure {j}. 10-year cumulative incidence of {gsub('_outcome', '', i)} in polyendocrine metabolic ovarian syndrome (PMOS) individuals, overall and stratified by age. \n\n"))
+  p <- getSurvivalPlot(data$survival, outcome = i, years = 10)
+  print(p)
+  j <- j + 1
+}
+```
+
+\newpage
+Figure S1. Median age at index date by calendar year.
+```{r}
+data[["summarise_characteristics"]] |>
+  dplyr::filter(variable_name == "Age",
+                strata_name == "calendar_year",
+                strata_level != "overall")  |>
+  mutate("cdm_name" = factor(cdm_name, levels = c("DK-DHR", "FinOMOP-THL", "SIDIAP", "IPCI", "CPRD GOLD"))) |>
+  arrange(cdm_name) |>
+  CohortCharacteristics::plotCharacteristics(
+    plotType = "boxplot",
+    facet = "cdm_name"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  
+
+```
+
+\newpage
+Figure S2. Median time from the first recorded occurrence of each pre-defined comorbidity of interest to the first recorded PMOS diagnosis.
+```{r}
+data[["summarise_characteristics"]] |>
+  omopgenerics::filterSettings(strata == "age_group") |>
+  filterStrata(age_group == "overall") |>
+  filterSettings(table_name == "pmos_1") |>
+  filter(variable_name %in% c("Cardiometabolic/vascular comorbidities",
+                              "Hyperandrogenic/reproductive comorbidities",
+                              "Mental health")) |>
+  mutate("cdm_name" = factor(cdm_name, levels = c("DK-DHR", "FinOMOP-THL", "SIDIAP", "IPCI", "CPRD GOLD"))) |>
+  arrange(cdm_name, variable_name, variable_level) |>
+  mutate(
+    variable_level = factor(
+      variable_level,
+      levels = rev(unique(variable_level))
+    )
+  ) |>
+  visOmopResults::boxPlot(
+    x = "variable_level",
+    colour = "variable_name",
+    facet = "cdm_name"
+  ) +
+  coord_flip() +
+  geom_hline(
+    yintercept = seq(-30,0, by = 5) * 365.25,
+    linetype = "dashed",
+    colour = "grey70",
+    linewidth = 0.4
+  ) +
+  scale_y_continuous(
+    breaks = seq(-30,0, by = 5) * 365.25,
+    labels = \(x) round(x / 365.25),
+    name = "Years"
+  ) +
+  scale_color_manual(
+    values = c(
+      "Cardiometabolic/vascular comorbidities" = "#FFAD0AFF",
+      "Hyperandrogenic/reproductive comorbidities" = "#859B6CFF",
+      "Mental health" = "#1F83B4FF")
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 0.5),
+    legend.position = "top"
+  ) +
+  labs(colour = "", x = "")
+```
