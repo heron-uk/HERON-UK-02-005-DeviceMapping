@@ -6,3 +6,12 @@ DeviceMapping/DeviceMapping.Rproj
 DeviceMapping/shiny/data/studyData.RData
 DeviceMapping/shiny/rawData/*.csv
 DeviceMapping/shiny/report.docx
+DeviceMapping/postprocessing/AccessGUDID*
+DeviceMapping/postprocessing/data/*.csv
+DeviceMapping/postprocessing/implantable_list
+DeviceMapping/postprocessing/results/*.csv
+DeviceMapping/postprocessing/shiny/data/*.csv
+DeviceMapping/postprocessing/shiny/data/*.RData
+DeviceMapping/report_old/data/*.RData
+DeviceMapping/report_old/rawData/*.csv
+DeviceMapping/study/studyCode/results/*.csv
