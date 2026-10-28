@@ -62,7 +62,8 @@ visTable(res |>
                       "Records per person"))) |> 
            arrange(variable_name) |> 
            mutate(variable_name = as.character(variable_name)), 
-         header = "cdm_name",groupColumn = "variable_name",
+         header = "cdm_name",
+         groupColumn = character(),
          hide = c("result_id", "group_level", "group_name",
                   "strata_name", "strata_level",
                   "estimate_type",
@@ -117,10 +118,10 @@ id_counts |>
 ```{r, echo=FALSE, warning = FALSE, message=FALSE, results = 'asis', fig.align="center", fig.width=10, fig.height=7, out.width = '90%', dpi=600}
 attr(res, "settings") <- attr(res, "settings") |> 
   mutate(trend_type = case_when(
-    has_uid == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
-    has_uid == "TRUE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwithout unique identifier",
-    has_uid == "FALSE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwithout unique identifier",
-    has_uid == "FALSE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwith unique identifier",
+    has_udi == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
+    has_udi == "TRUE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwithout unique identifier",
+    has_udi == "FALSE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwithout unique identifier",
+    has_udi == "FALSE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwith unique identifier",
     .default = "All records"
   ))
 
@@ -192,7 +193,7 @@ c_order <- res |>
 
 res |> 
   filterSettings(result_type == "summarise_characteristics") |> 
-  mutate(group_level = factor(group_level, levels = c_order)) |> 
+  mutate(group_level = factor(group_level, levels = unique(c_order))) |> 
   arrange(group_level) |> 
   mutate(group_level = as.character(group_level)) |> 
   tableCharacteristics(header = c("cdm_name"), 
