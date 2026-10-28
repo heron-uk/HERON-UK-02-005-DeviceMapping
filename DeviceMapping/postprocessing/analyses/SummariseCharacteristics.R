@@ -18,22 +18,22 @@ resultList <- list(
   summarise_table = list(result_type = "summarise_table")
 )
 
-data <- prepareResult(result = results, resultList = resultList)
+data <- prepareResult(result = result, resultList = resultList)
 
 res_all <- data$summarise_characteristics |>
+  filter(variable_name == "Device characteristics") |>
   splitAdditional() |>
-  filter(device_name != "overall") |>
-  mutate(estimate_value = if_else(grepl("-", estimate_value), 0L, as.numeric(estimate_value))) |>
+  mutate("estimate_value" = if_else(grepl("-", estimate_value), 5L, as.numeric(estimate_value))) |> # to change!!!!!!!!!!
   group_by(result_id, cdm_name, group_name, group_level,
-           strata_name, strata_level, device_name, estimate_name, estimate_type,
-           manufacturer, catalogue_number) |>
-  summarise(estimate_value = sum(estimate_value, na.rm = TRUE), .groups = "drop_last") |>
+           strata_name, strata_level,estimate_name, estimate_type,
+           source, manufacturer, device_name,  catalogue_number) |>
+  summarise("estimate_value" = sum(estimate_value, na.rm = TRUE), .groups = "drop_last") |>
   ungroup() |>
   distinct() |>
   filter(estimate_value != 0) |>
-  mutate(variable_name = device_name,
-         variable_level = NA_character_) |>
-  uniteAdditional(c("device_name", "manufacturer", "catalogue_number")) |>
+  mutate("variable_name" = "Device characteristics",
+         "variable_level" = NA_character_) |>
+  uniteAdditional(c("source", "manufacturer", "device_name", "catalogue_number")) |>
   mutate("result_id" = 1L) |>
   newSummarisedResult(settings = tibble(
     "result_id" = 1L,
@@ -44,17 +44,18 @@ res_all <- data$summarise_characteristics |>
   ))
 
 res_dn_man <- data$summarise_characteristics |>
+  filter(variable_name == "Device characteristics") |>
   splitAdditional() |>
-  filter(device_name != "overall") |>
-  mutate(estimate_value = if_else(grepl("-", estimate_value), 0L, as.numeric(estimate_value))) |>
+  mutate("estimate_value" = if_else(grepl("-", estimate_value), 5L, as.numeric(estimate_value))) |>
   group_by(result_id, cdm_name, group_name, group_level,
-           strata_name, strata_level, device_name, estimate_name, estimate_type, manufacturer) |>
-  summarise(estimate_value = sum(estimate_value, na.rm = TRUE), .groups = "drop_last") |>
+           strata_name, strata_level, estimate_name, estimate_type,
+           source, manufacturer, device_name) |>
+  summarise("estimate_value" = sum(estimate_value, na.rm = TRUE), .groups = "drop_last") |>
   ungroup() |>
   filter(estimate_value != 0) |>
-  mutate(variable_name = device_name,
-         variable_level = NA_character_) |>
-  uniteAdditional(c("device_name", "manufacturer")) |>
+  mutate("variable_name" = "Device characteristics",
+         "variable_level" = NA_character_) |>
+  uniteAdditional(c("source", "manufacturer", "device_name")) |>
   mutate("result_id" = 1L) |>
   newSummarisedResult(settings = tibble(
     "result_id" = 1L,
@@ -65,16 +66,17 @@ res_dn_man <- data$summarise_characteristics |>
   ))
 
 res_dn <- data$summarise_characteristics |>
+  filter(variable_name == "Device characteristics") |>
   splitAdditional() |>
-  filter(device_name != "overall") |>
-  mutate(estimate_value = if_else(grepl("-", estimate_value), 0L, as.numeric(estimate_value))) |>
+  mutate("estimate_value" = if_else(grepl("-", estimate_value), 5L, as.numeric(estimate_value))) |>
   group_by(result_id, cdm_name, group_name, group_level,
-           strata_name, strata_level, device_name, estimate_name, estimate_type) |>
-  summarise(estimate_value = sum(estimate_value, na.rm = TRUE), .groups = "drop_last") |>
+           strata_name, strata_level, estimate_name, estimate_type,
+           source, device_name) |>
+  summarise("estimate_value" = sum(estimate_value, na.rm = TRUE), .groups = "drop_last") |>
   ungroup() |>
-  mutate(variable_name = device_name,
-         variable_level = NA_character_) |>
-  uniteAdditional(c("device_name")) |>
+  mutate("variable_name" = "Device characteristics",
+         "variable_level" = NA_character_) |>
+  uniteAdditional(c("source", "device_name")) |>
   mutate("result_id" = 1L) |>
   filter(estimate_value != 0) |>
   newSummarisedResult(settings = tibble(
@@ -85,8 +87,7 @@ res_dn <- data$summarise_characteristics |>
     "min_cell_count" = 5
   ))
 
-data$summarise_characteristics <- bind(data$summarise_characteristics |>
-                                         filterAdditional(device_name == "overall"),
+data$summarise_characteristics <- bind(data$summarise_characteristics,
                                        res_all,
                                        res_dn_man,
                                        res_dn)

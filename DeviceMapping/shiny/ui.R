@@ -29,6 +29,7 @@ ui <- bslib::page_navbar(
   bslib::nav_panel(
     title = "Summary",
     icon = shiny::icon("file-alt"),
+    
     bslib::card(
       bslib::card_header("Explore results"),
       shiny::tags$div(
@@ -44,6 +45,7 @@ ui <- bslib::page_navbar(
   bslib::nav_menu(
     title = "OmopSketch",
     icon = shiny::icon("list"),
+    # Snapshot ----
     bslib::nav_panel(
       title = "Snapshot",
       icon = shiny::icon("camera"),
@@ -133,6 +135,7 @@ ui <- bslib::page_navbar(
         )
       )
     ),
+    # Clinical tables ----
     bslib::nav_panel(
       title = "Clinical Tables Summary",
       icon = shiny::icon("bars-staggered"),
@@ -154,30 +157,6 @@ ui <- bslib::page_navbar(
             label = "CDM name",
             choices = choices$summarise_clinical_records_cdm_name,
             selected = selected$summarise_clinical_records_cdm_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_clinical_records_omop_table",
-            label = "Omop table",
-            choices = choices$summarise_clinical_records_omop_table,
-            selected = selected$summarise_clinical_records_omop_table,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_clinical_records_variable_name",
-            label = "Variable name",
-            choices = choices$summarise_clinical_records_variable_name,
-            selected = selected$summarise_clinical_records_variable_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_clinical_records_estimate_name",
-            label = "Estimate name",
-            choices = choices$summarise_clinical_records_estimate_name,
-            selected = selected$summarise_clinical_records_estimate_name,
             multiple = TRUE,
             options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
           ),
@@ -224,7 +203,7 @@ ui <- bslib::page_navbar(
                     ),
                     sortable::add_rank_list(
                       text = "Hide",
-                      labels = character(),
+                      labels = c("type_concept_id", "is_required"),
                       input_id = "summarise_clinical_records_table_hide"
                     )
                   ),
@@ -238,6 +217,7 @@ ui <- bslib::page_navbar(
         )
       )
     ),
+    # Trends ----
     bslib::nav_panel(
       title = "Trends",
       icon = shiny::icon("arrow-trend-up"),
@@ -433,7 +413,7 @@ ui <- bslib::page_navbar(
                     inputId = "summarise_trend_plot_colour",
                     label = "Colour",
                     choices = c("cdm_name", "omop_table", "time_interval", "has_udi", "interval", "mapped_to_standard", "type"),
-                    selected = character(),
+                    selected = c("has_udi", "mapped_to_standard"),
                     multiple = TRUE,
                     options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
                   ),
@@ -448,9 +428,11 @@ ui <- bslib::page_navbar(
       )
     )
   ),
+  # Codelist Generator ----
   bslib::nav_menu(
     title = "CodelistGenerator",
     icon = shiny::icon("list"),
+    ## Cohort code use ----
     bslib::nav_panel(
       title = "Cohort code use",
       icon = shiny::icon("chart-column"),
@@ -565,139 +547,12 @@ ui <- bslib::page_navbar(
       )
     )
   ),
+
+  #   Cohort characteristics ----
   bslib::nav_menu(
-    title = "CohortCharacteristics",
+    title = "Characterisation",
     icon = shiny::icon("list"),
-    bslib::nav_panel(
-      title = "Cohort Attrition",
-      icon = shiny::icon("layer-group"),
-      bslib::layout_sidebar(
-        sidebar = bslib::sidebar(
-          bslib::card(
-            class = "sticky-top-btn",
-            bslib::card_body(
-              shiny::actionButton(
-                inputId = "update_summarise_cohort_attrition",
-                label = "Update content",
-                width = "100%"
-              ),
-              uiOutput(outputId = "update_message_summarise_cohort_attrition")
-            )
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_cohort_attrition_cdm_name",
-            label = "CDM name",
-            choices = choices$summarise_cohort_attrition_cdm_name,
-            selected = selected$summarise_cohort_attrition_cdm_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_cohort_attrition_cohort_name",
-            label = "Cohort name",
-            choices = choices$summarise_cohort_attrition_cohort_name,
-            selected = selected$summarise_cohort_attrition_cohort_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_cohort_attrition_variable_name",
-            label = "Variable name",
-            choices = choices$summarise_cohort_attrition_variable_name,
-            selected = selected$summarise_cohort_attrition_variable_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-          ),
-          position = "left"
-        ),
-        bslib::navset_card_tab(
-          bslib::nav_panel(
-            title = "Table Attrition",
-            bslib::card(
-              full_screen = TRUE,
-              bslib::card_header(
-                bslib::popover(
-                  shiny::icon("download"),
-                  shinyWidgets::pickerInput(
-                    inputId = "summarise_cohort_attrition_table_format",
-                    label = "Format",
-                    choices = c("docx", "png", "pdf", "html"),
-                    selected = "docx",
-                    multiple = FALSE,
-                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                  ),
-                  shiny::downloadButton(outputId = "summarise_cohort_attrition_table_download", label = "Download table")
-                ),
-                class = "text-end"
-              ),
-              bslib::layout_sidebar(
-                sidebar = bslib::sidebar(
-                  sortable::bucket_list(
-                    header = NULL,
-                    sortable::add_rank_list(
-                      text = "None",
-                      labels = "reason",
-                      input_id = "summarise_cohort_attrition_table_none"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Header",
-                      labels = "variable_name",
-                      input_id = "summarise_cohort_attrition_table_header"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Group columns",
-                      labels = c("cdm_name", "cohort_name"),
-                      input_id = "summarise_cohort_attrition_table_group_column"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Hide",
-                      labels = c("variable_level", "reason_id", "estimate_name", "cdm_version", "cohort_definition_id", "table_name", "vocabulary_version"),
-                      input_id = "summarise_cohort_attrition_table_hide"
-                    )
-                  ),
-                  position = "right"
-                ),
-                gt::gt_output("summarise_cohort_attrition_table") |>
-                  shinycssloaders::withSpinner()
-              )
-            )
-          ),
-          bslib::nav_panel(
-            title = "Diagram",
-            bslib::card(
-              full_screen = TRUE,
-              bslib::card_header(
-                bslib::popover(
-                  shiny::icon("download"),
-                  shiny::numericInput(
-                    inputId = "summarise_cohort_attrition_diagram_width",
-                    label = "Width (px)",
-                    value = 2000
-                  ),
-                  shiny::downloadButton(outputId = "summarise_cohort_attrition_diagram_download", label = "Download Diagram")
-                ),
-                class = "text-end"
-              ),
-              bslib::layout_sidebar(
-                sidebar = bslib::sidebar(
-                  shinyWidgets::pickerInput(
-                    inputId = "summarise_cohort_attrition_diagram_show",
-                    label = "Show",
-                    choices = c("subjects", "records"),
-                    selected = c("subjects", "records"),
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                  ),
-                  position = "right"
-                ),
-                DiagrammeR::grVizOutput("summarise_cohort_attrition_diagram") |>
-                  shinycssloaders::withSpinner()
-              )
-            )
-          )
-        )
-      )
-    ),
+    ##  Cohort characteristics ----
     bslib::nav_panel(
       title = "Cohort Characteristics",
       icon = shiny::icon("users-gear"),
@@ -723,19 +578,11 @@ ui <- bslib::page_navbar(
             options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
           ),
           shinyWidgets::pickerInput(
-            inputId = "summarise_characteristics_cohort_name",
+            inputId = "summarise_characteristics_cohort_name", 
             label = "Cohort name",
             choices = choices$summarise_characteristics_cohort_name,
             selected = selected$summarise_characteristics_cohort_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_characteristics_estimate_name",
-            label = "Estimate name",
-            choices = choices$summarise_characteristics_estimate_name,
-            selected = selected$summarise_characteristics_estimate_name,
-            multiple = TRUE,
+            multiple = FALSE,
             options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
           ),
           position = "left"
@@ -760,36 +607,8 @@ ui <- bslib::page_navbar(
                 ),
                 class = "text-end"
               ),
-              bslib::layout_sidebar(
-                sidebar = bslib::sidebar(
-                  sortable::bucket_list(
-                    header = NULL,
-                    sortable::add_rank_list(
-                      text = "None",
-                      labels = c("variable_name", "variable_level", "estimate_name"),
-                      input_id = "summarise_characteristics_table_none"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Header",
-                      labels = c("cdm_name", "cohort_name"),
-                      input_id = "summarise_characteristics_table_header"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Group columns",
-                      labels = character(),
-                      input_id = "summarise_characteristics_table_group_column"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Hide",
-                      labels = "table_name",
-                      input_id = "summarise_characteristics_table_hide"
-                    )
-                  ),
-                  position = "right"
-                ),
-                gt::gt_output("summarise_characteristics_table") |>
-                  shinycssloaders::withSpinner()
-              )
+              gt::gt_output("summarise_characteristics_table") |>
+                shinycssloaders::withSpinner()
             )
           ),
           bslib::nav_panel(
@@ -867,6 +686,285 @@ ui <- bslib::page_navbar(
         )
       )
     ),
+    ##  Device characteristics ----
+    bslib::nav_panel(
+      title = "Device Characteristics",
+      icon = shiny::icon("laptop-medical"),
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            class = "sticky-top-btn",
+            bslib::card_body(
+              shiny::actionButton(
+                inputId = "update_summarise_device_characteristics",
+                label = "Update content",
+                width = "100%"
+              ),
+              uiOutput(outputId = "update_message_summarise_device_characteristics")
+            )
+          ),
+          shinyWidgets::pickerInput(
+            inputId = "summarise_device_characteristics_cdm_name",
+            label = "CDM name",
+            choices = choices$summarise_device_characteristics_cdm_name,
+            selected = selected$summarise_device_characteristics_cdm_name,
+            multiple = TRUE,
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+          ),
+          shinyWidgets::pickerInput(
+            inputId = "summarise_device_characteristics_cohort_name",
+            label = "Cohort name",
+            choices = choices$summarise_device_characteristics_cohort_name,
+            selected = selected$summarise_device_characteristics_cohort_name,
+            multiple = FALSE,
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+          ),
+          radioButtons( 
+            inputId = "summarise_device_characteristics_analysis_type", 
+            label = "Analysis by", 
+            choices = list( 
+              "Device name" = 1, 
+              "Manufacturer and Device name" = 2, 
+              "Manufacturer, Device name, and catalogue number" = 3,
+              "UDI" = 4
+            ) 
+          ), 
+          position = "left"
+        ),
+        bslib::navset_card_tab(
+          bslib::nav_panel(
+            title = "Table Characteristics",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                bslib::popover(
+                  shiny::icon("download"),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_device_characteristics_table_format",
+                    label = "Format",
+                    choices = c("docx", "png", "pdf", "html"),
+                    selected = "docx",
+                    multiple = FALSE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shiny::downloadButton(outputId = "summarise_device_characteristics_table_download", label = "Download table")
+                ),
+                class = "text-end"
+              ),
+              gt::gt_output("summarise_device_characteristics_table") |>
+                shinycssloaders::withSpinner()
+            )
+          ),
+          bslib::nav_panel(
+            title = "Plot Characteristics",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                bslib::popover(
+                  shiny::icon("download"),
+                  shiny::numericInput(
+                    inputId = "summarise_device_characteristics_plot_width",
+                    label = "Width",
+                    value = 15
+                  ),
+                  shiny::numericInput(
+                    inputId = "summarise_device_characteristics_plot_height",
+                    label = "Height",
+                    value = 15
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_device_characteristics_plot_units",
+                    label = "Units",
+                    choices = c("px", "cm", "inch"),
+                    selected = "cm",
+                    multiple = FALSE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shiny::numericInput(
+                    inputId = "summarise_device_characteristics_plot_dpi",
+                    label = "DPI",
+                    value = 300
+                  ),
+                  shiny::downloadButton(outputId = "summarise_device_characteristics_plot_download", label = "Download plot")
+                ),
+                class = "text-end"
+              ),
+              bslib::layout_sidebar(
+                sidebar = bslib::sidebar(
+                  shinyWidgets::materialSwitch(
+                    inputId = "summarise_device_characteristics_plot_interactive",
+                    label = "Interactive",
+                    value = TRUE
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_device_characteristics_plot_plot_type",
+                    label = "Plot type",
+                    choices = c("boxplot", "barplot", "scatterplot"),
+                    selected = "boxplot",
+                    multiple = FALSE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_device_characteristics_plot_facet",
+                    label = "Facet",
+                    choices = c("cdm_name", "cohort_name"),
+                    selected = "cdm_name",
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_device_characteristics_plot_colour",
+                    label = "Colour",
+                    choices = c("cdm_name", "cohort_name"),
+                    selected = "cohort_name",
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  position = "right"
+                ),
+                shiny::uiOutput("summarise_device_characteristics_plot") |>
+                  shinycssloaders::withSpinner()
+              )
+            )
+          )
+        )
+      )
+    ),
+    ##  Indications characteristics ----
+    bslib::nav_panel(
+      title = "Indications",
+      icon = shiny::icon("medical"),
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            class = "sticky-top-btn",
+            bslib::card_body(
+              shiny::actionButton(
+                inputId = "update_summarise_indications_characteristics",
+                label = "Update content",
+                width = "100%"
+              ),
+              uiOutput(outputId = "update_message_summarise_indications_characteristics")
+            )
+          ),
+          shinyWidgets::pickerInput(
+            inputId = "summarise_indications_characteristics_cdm_name",
+            label = "CDM name",
+            choices = choices$summarise_indications_characteristics_cdm_name,
+            selected = selected$summarise_indications_characteristics_cdm_name,
+            multiple = TRUE,
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+          ),
+          shinyWidgets::pickerInput(
+            inputId = "summarise_indications_characteristics_cohort_name",
+            label = "Cohort name",
+            choices = choices$summarise_indications_characteristics_cohort_name,
+            selected = selected$summarise_indications_characteristics_cohort_name,
+            multiple = FALSE,
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+          ),, 
+          position = "left"
+        ),
+        bslib::navset_card_tab(
+          bslib::nav_panel(
+            title = "Table Characteristics",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                bslib::popover(
+                  shiny::icon("download"),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_indications_characteristics_table_format",
+                    label = "Format",
+                    choices = c("docx", "png", "pdf", "html"),
+                    selected = "docx",
+                    multiple = FALSE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shiny::downloadButton(outputId = "summarise_indications_characteristics_table_download", label = "Download table")
+                ),
+                class = "text-end"
+              ),
+              gt::gt_output("summarise_indications_characteristics_table") |>
+                shinycssloaders::withSpinner()
+            )
+          ),
+          bslib::nav_panel(
+            title = "Plot Characteristics",
+            bslib::card(
+              full_screen = TRUE,
+              bslib::card_header(
+                bslib::popover(
+                  shiny::icon("download"),
+                  shiny::numericInput(
+                    inputId = "summarise_indications_characteristics_plot_width",
+                    label = "Width",
+                    value = 15
+                  ),
+                  shiny::numericInput(
+                    inputId = "summarise_indications_characteristics_plot_height",
+                    label = "Height",
+                    value = 15
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_indications_characteristics_plot_units",
+                    label = "Units",
+                    choices = c("px", "cm", "inch"),
+                    selected = "cm",
+                    multiple = FALSE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shiny::numericInput(
+                    inputId = "summarise_indications_characteristics_plot_dpi",
+                    label = "DPI",
+                    value = 300
+                  ),
+                  shiny::downloadButton(outputId = "summarise_indications_characteristics_plot_download", label = "Download plot")
+                ),
+                class = "text-end"
+              ),
+              bslib::layout_sidebar(
+                sidebar = bslib::sidebar(
+                  shinyWidgets::materialSwitch(
+                    inputId = "summarise_indications_characteristics_plot_interactive",
+                    label = "Interactive",
+                    value = TRUE
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_indications_characteristics_plot_plot_type",
+                    label = "Plot type",
+                    choices = c("boxplot", "barplot", "scatterplot"),
+                    selected = "boxplot",
+                    multiple = FALSE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_indications_characteristics_plot_facet",
+                    label = "Facet",
+                    choices = c("cdm_name", "cohort_name"),
+                    selected = "cdm_name",
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  shinyWidgets::pickerInput(
+                    inputId = "summarise_indications_characteristics_plot_colour",
+                    label = "Colour",
+                    choices = c("cdm_name", "cohort_name"),
+                    selected = "cohort_name",
+                    multiple = TRUE,
+                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
+                  ),
+                  position = "right"
+                ),
+                shiny::uiOutput("summarise_indications_characteristics_plot") |>
+                  shinycssloaders::withSpinner()
+              )
+            )
+          )
+        )
+      )
+    ),
+    ## Large scale characteristics ----
     bslib::nav_panel(
       title = "Large Scale Characteristics",
       icon = shiny::icon("arrow-up-right-dots"),
@@ -1062,123 +1160,7 @@ ui <- bslib::page_navbar(
       )
     )
   ),
-  bslib::nav_panel(
-    title = "Logs",
-    icon = shiny::icon("clipboard-list"),
-    bslib::layout_sidebar(
-      sidebar = bslib::sidebar(
-        bslib::card(
-          class = "sticky-top-btn",
-          bslib::card_body(
-            shiny::actionButton(
-              inputId = "update_summarise_log_file",
-              label = "Update content",
-              width = "100%"
-            ),
-            uiOutput(outputId = "update_message_summarise_log_file")
-          )
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_file_cdm_name",
-          label = "CDM name",
-          choices = choices$summarise_log_file_cdm_name,
-          selected = selected$summarise_log_file_cdm_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_file_variable_name",
-          label = "Variable name",
-          choices = choices$summarise_log_file_variable_name,
-          selected = selected$summarise_log_file_variable_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-        ),
-        position = "left"
-      ),
-      bslib::navset_card_tab(
-        bslib::nav_panel(
-          title = "Table Logs",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_file_table_format",
-                  label = "Format",
-                  choices = c("docx", "png", "pdf", "html"),
-                  selected = "docx",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                ),
-                shiny::downloadButton(outputId = "summarise_log_file_table_download", label = "Download table")
-              ),
-              class = "text-end"
-            ),
-            gt::gt_output("summarise_log_file_table") |>
-              shinycssloaders::withSpinner()
-          )
-        ),
-        bslib::nav_panel(
-          title = "Plot Timing",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shiny::numericInput(
-                  inputId = "summarise_log_file_plot_width",
-                  label = "Width",
-                  value = 15
-                ),
-                shiny::numericInput(
-                  inputId = "summarise_log_file_plot_height",
-                  label = "Height",
-                  value = 15
-                ),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_file_plot_units",
-                  label = "Units",
-                  choices = c("px", "cm", "inch"),
-                  selected = "cm",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                ),
-                shiny::numericInput(
-                  inputId = "summarise_log_file_plot_dpi",
-                  label = "DPI",
-                  value = 300
-                ),
-                shiny::downloadButton(outputId = "summarise_log_file_plot_download", label = "Download plot")
-              ),
-              class = "text-end"
-            ),
-            bslib::layout_sidebar(
-              sidebar = bslib::sidebar(
-                shinyWidgets::materialSwitch(
-                  inputId = "summarise_log_file_plot_interactive",
-                  label = "Interactive",
-                  value = TRUE
-                ),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_file_plot_position",
-                  label = "Columns",
-                  choices = c("dodge", "stack"),
-                  selected = "stack",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3")
-                ),
-                position = "right"
-              ),
-              shiny::uiOutput("summarise_log_file_plot") |>
-                shinycssloaders::withSpinner()
-            )
-          )
-        )
-      )
-    )
-  ),
+  ##  Cohort attrition ----
   bslib::nav_panel(
     title = "Summarise table",
     icon = shiny::icon("folder"),

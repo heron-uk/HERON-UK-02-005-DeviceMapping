@@ -14,6 +14,10 @@ resultList <- list(
 source(file.path(getwd(), "functions.R"))
 
 result <- omopgenerics::importSummarisedResult(here("..","results", "results_v2.csv"))
+result <- result |>
+  mutate("cdm_name" = gsub("BartsHealthOMOP", "Barts Health", cdm_name),
+         "cdm_name" = gsub("IDRIL_1", "Lancashire", cdm_name)) 
+
 attr(result, "settings") <- attr(result, "settings") |> 
   mutate(trend_type = case_when(
     has_udi == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
@@ -25,10 +29,6 @@ attr(result, "settings") <- attr(result, "settings") |>
 
 data <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
-
-data$summarise_characteristics <- data$summarise_characteristics |> 
-  mutate("variable_name" = if_else(grepl("Udi", variable_name), "Device characteristics", variable_name)) 
-
 
 values$summarise_characteristics_cohort_name <- c("Pacemaker", "Femoral head", "Intraocular lens")
 

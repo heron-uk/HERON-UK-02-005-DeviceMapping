@@ -13,13 +13,34 @@ resultList <- list(
 
 source(file.path(getwd(), "functions.R"))
 
-result <- omopgenerics::importSummarisedResult(file.path(getwd(), "rawData"))
+result <- omopgenerics::importSummarisedResult(here("..","postprocessing", "results", "results_v2.csv"))
+result <- result |>
+  mutate("cdm_name" = gsub("BartsHealthOMOP", "Barts Health", cdm_name),
+         "cdm_name" = gsub("IDRIL_1", "Lancashire", cdm_name)) 
 
-
-
+attr(result, "settings") <- attr(result, "settings") |> 
+  mutate(trend_type = case_when(
+    has_udi == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
+    has_udi == "TRUE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwithout unique identifier",
+    has_udi == "FALSE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwithout unique identifier",
+    has_udi == "FALSE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwith unique identifier",
+    .default = "All records"
+  ))
 
 data <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
+
+values$summarise_characteristics_cohort_name <- c("Pacemaker", "Femoral head", "Intraocular lens")
+
+for (nm in names(values)[grepl("summarise_characteristics_", names(values))]) {
+  new_nm <- sub("summarise_characteristics_", "summarise_device_characteristics_", nm)
+  values[[new_nm]] <- values[[nm]]
+}
+
+for (nm in names(values)[grepl("summarise_characteristics_", names(values))]) {
+  new_nm <- sub("summarise_characteristics_", "summarise_indications_characteristics_", nm)
+  values[[new_nm]] <- values[[nm]]
+}
 
 # edit choices and values of interest
 choices <- values

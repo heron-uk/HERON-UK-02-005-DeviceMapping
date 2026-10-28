@@ -468,10 +468,10 @@ getCohort <- function(input) {
 getAnalysisType <- function(input) {
   
   x <- case_when(
-    input == 1 ~ "device_name",
-    input == 2 ~ "device_name &&& manufacturer",
-    input == 3 ~ "device_name &&& manufacturer &&& catalogue_number",
-    input == 4 ~ "udi &&& device_name &&& catalogue_number &&& manufacturer",
+    input == 1 ~ "source &&& device_name",
+    input == 2 ~ "source &&& device_name &&& manufacturer" ,
+    input == 3 ~ "source &&& device_name &&& manufacturer &&& catalogue_number",
+    input == 4 ~ "source &&& manufacturer &&& device_name &&& catalogue_number &&& udi",
   )
   
   return(x)

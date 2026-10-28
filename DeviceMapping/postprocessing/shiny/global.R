@@ -31,11 +31,11 @@ library(visOmopResults)
 library(yaml)
 library(here)
 
-# preprocess data if it has not been done
+# # preprocess data if it has not been done
 fileData <- file.path(getwd(), "data", "studyData.RData")
-if (!file.exists(fileData)) {
+# if (!file.exists(fileData)) {
   source(file.path(getwd(), "rawData", "preprocess.R"))
-}
+# }
 
 # uncomment to load the raw data
 # rawData <- omopgenerics::importSummarisedResult(file.path(getwd(), "rawData"))

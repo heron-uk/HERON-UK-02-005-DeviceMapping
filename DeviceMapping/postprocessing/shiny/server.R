@@ -351,6 +351,94 @@ server <- function(input, output, session) {
     }
   )
 
+  # summarise_characteristics -----
+  ## update message if filter is changed
+  shiny::observe({
+    updateButtons$summarise_characteristics <- TRUE
+  }) |>
+    shiny::bindEvent(
+      input$summarise_characteristics_cdm_name,
+      input$summarise_characteristics_cohort_name,
+      input$summarise_characteristics_analysis_type,
+      ignoreInit = TRUE
+    )
+  shiny::observeEvent(updateButtons$summarise_characteristics, {
+    if (updateButtons$summarise_characteristics == TRUE) {
+      output$update_message_summarise_characteristics <- shiny::renderUI(updateMessage) # defined in functions.R
+    } else {
+      output$update_message_summarise_characteristics <- shiny::renderUI(NULL)
+    }
+  })
+  shiny::observeEvent(input$update_summarise_characteristics, {
+    updateButtons$summarise_characteristics <- FALSE
+  })
+  
+  ## get summarise_characteristics data
+  getSummariseCharacteristicsData <- shiny::eventReactive(input$update_summarise_characteristics, {
+    data[["summarise_characteristics"]] |> 
+      dplyr::filter(
+        .data$cdm_name %in% input$summarise_characteristics_cdm_name
+      ) |>
+      omopgenerics::filterGroup(.data$cohort_name %in% !!getCohort(input$summarise_characteristics_cohort_name)) |>
+      dplyr::filter(!variable_name %in% c("Table 1 cohorts flag -7 to 7", "Device characteristics")) |>
+      dplyr::filter(!variable_name %in% c("Days in cohort")) |>
+      dplyr::mutate("variable_name" = gsub("Prior observation", "Previous number of days in the database", variable_name)) |>
+      dplyr::mutate("variable_name" = gsub("Future observation", "Future number of days in the database", variable_name)) |>
+      dplyr::mutate("variable_name" = factor(variable_name,
+                                             levels = c("Number records", "Number subjects", "Age", "Sex",
+                                                        "Days to next record", "Cohort start date", 
+                                                        "Cohort end date", "Previous number of days in the database",
+                                                        "Future number of days in the database"))) |>
+      arrange(cdm_name, group_level, variable_name)
+  })
+  getSummariseCharacteristicsTable <- shiny::reactive({
+    x <- getSummariseCharacteristicsData() 
+
+    x |>
+      visOmopTable(estimateName = c("N (%)" = "<count> (<percentage>)",
+                                    "N" = "<count>",
+                                    "Median (IQR)" = "<median> (<q25>, <q75>)",
+                                    "Range" = "<min>, <max>"),
+               hide = c("result_id", additionalColumns(x)),
+               .options =  list("keepNotFormatted" = FALSE),
+               header = "cdm_name",
+               group = "cohort_name")
+  })
+  output$summarise_characteristics_table <- gt::render_gt({
+    getSummariseCharacteristicsTable()
+  })
+  output$summarise_characteristics_table_download <- shiny::downloadHandler(
+    filename = paste0("table_characteristics.", input$summarise_characteristics_table_format),
+    content = function(file) {
+      gt::gtsave(getSummariseCharacteristicsTable(), file)
+    }
+  )
+  getSummariseCharacteristicsPlot <- shiny::reactive({
+    getSummariseCharacteristicsData() |>
+      CohortCharacteristics::plotCharacteristics(
+        plotType = input$summarise_characteristics_plot_plot_type,
+        facet = input$summarise_characteristics_plot_facet,
+        colour = input$summarise_characteristics_plot_colour
+      )
+  })
+  output$summarise_characteristics_plot <- shiny::renderUI({
+    x <- getSummariseCharacteristicsPlot()
+    renderInteractivePlot(x, input$summarise_characteristics_plot_interactive)
+  })
+  output$summarise_characteristics_plot_download <- shiny::downloadHandler(
+    filename = "plot_characteristics.png",
+    content = function(file) {
+      ggplot2::ggsave(
+        filename = file,
+        plot = getSummariseCharacteristicsPlot(),
+        width = as.numeric(input$summarise_characteristics_plot_width),
+        height = as.numeric(input$summarise_characteristics_plot_height),
+        units = input$summarise_characteristics_plot_units,
+        dpi = as.numeric(input$summarise_characteristics_plot_dpi)
+      )
+    }
+  )
+  
   # summarise_device_characteristics -----
   ## update message if filter is changed
   shiny::observe({
@@ -359,6 +447,7 @@ server <- function(input, output, session) {
     shiny::bindEvent(
       input$summarise_device_characteristics_cdm_name,
       input$summarise_device_characteristics_cohort_name,
+      input$summarise_device_characteristics_analysis_type,
       ignoreInit = TRUE
     )
   shiny::observeEvent(updateButtons$summarise_device_characteristics, {
@@ -380,13 +469,22 @@ server <- function(input, output, session) {
       ) |>
       omopgenerics::filterGroup(.data$cohort_name %in% !!getCohort(input$summarise_device_characteristics_cohort_name)) |>
       omopgenerics::filterSettings(additional %in% !!getAnalysisType(input$summarise_device_characteristics_analysis_type))
+
     x |>
       splitAdditional() |>
       splitGroup() |>
-      select("cdm_name", "cohort_name", additionalColumns(x), "estimate_name", "estimate_type", "estimate_value") 
+      filter(variable_name == "Device characteristics") |>
+      mutate("source" = if_else(source == "overall", "-", source),
+             "device_name" = if_else(device_name %in% c("-", "overall"), "No UDI identified", device_name)) |>
+      mutate(across(any_of(starts_with("manufacturer")), ~ if_else(.x == "overall", "-", .x))) |>
+      mutate(across(any_of(starts_with("catalogue_number")), ~ if_else(.x == "overall", "-", .x))) |>
+      arrange(cdm_name, cohort_name, variable_name, across(all_of(additionalColumns(x)))) |>
+      select("cdm_name", "cohort_name", additionalColumns(x), "estimate_name", "estimate_type", "estimate_value")
   })
   getSummariseDeviceCharacteristicsTable <- shiny::reactive({
-    getSummariseDeviceCharacteristicsData() |>
+    x <- getSummariseDeviceCharacteristicsData() 
+    
+    x |>
       visTable(estimateName = c("N (%)" = "<count> (<percentage>)"),
                header = "cdm_name",
                group = "cohort_name",

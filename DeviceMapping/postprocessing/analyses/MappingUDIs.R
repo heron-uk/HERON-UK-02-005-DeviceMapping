@@ -10,7 +10,7 @@ library(AccessGUDID)
 library(readr)
 source(here("functions.R"))
 
-map_devices <- TRUE
+map_devices <- FALSE
 
 # shiny is prepared to work with this resultList:
 resultList <- list(
@@ -30,7 +30,7 @@ results <- importSummarisedResult(path = here("data"))
 results <- results |>
   mutate(group_level = case_when(
     group_level == "concept_2615795" ~ "Dual chamber pacemaker",
-    group_level == "concept_2615796" ~ "Dingle chamber pacemaker",
+    group_level == "concept_2615796" ~ "Single chamber pacemaker",
     group_level == "concept_45758380" ~ "Anterior intraocular lens",
     group_level == "concept_45758713" ~ "Metallic femoral head",
     group_level == "concept_45758993" ~ "Posterior intraocular lens",
@@ -76,19 +76,22 @@ if(isTRUE(map_devices)) {
            "manufacturer_eudamed" = "manufacturer")
 
   udi_tibble_accessguid <- udi_tibble_accessguid |>
+    mutate("brand_name" = if_else(brand_name == "-", device_description, brand_name)) |>
     select("udi" = "device_di",
            "catalogue_number_accessguid" = "catalogue_number",
-           "device_name_accessguid" = "device_description",
+           "device_name_accessguid" = "brand_name",
            "manufacturer_accessguid" = "company_name") |>
     mutate("catalogue_number_accessguid" = gsub("-", NA_character_, catalogue_number_accessguid)) |>
-    mutate("manufacturer_accessguid" = gsub("-", NA_character_, manufacturer_accessguid)) |>
-    mutate("device_name_accessguid" = gsub("No device identified", NA_character_, device_name_accessguid))
-
+    mutate("manufacturer_accessguid" = gsub("-", NA_character_, manufacturer_accessguid))
 
   udi_tibble <- udi_tibble_eudamed |>
     inner_join(udi_tibble_accessguid,
                by = "udi") |>
-    mutate("Source" = if_else(!is.na(device_name_eudamed), "EUDAMED", "FDA")) |>
+    mutate("source" = case_when(
+      is.na(device_name_eudamed) & device_name_accessguid == "No device identified" ~ "-",
+      is.na(device_name_eudamed) & device_name_accessguid != "No device identified" ~ "FDA",
+      .default = "EUDAMED"
+    )) |>
     mutate("device_name" = if_else(!is.na(device_name_eudamed), device_name_eudamed, device_name_accessguid),
            "catalogue_number" = if_else(!is.na(catalogue_number_eudamed), catalogue_number_eudamed, catalogue_number_accessguid),
            "manufacturer" = if_else(!is.na(manufacturer_eudamed), manufacturer_eudamed, manufacturer_accessguid))
@@ -99,11 +102,12 @@ if(isTRUE(map_devices)) {
 udi_tibble <- read_csv(here("results", "mapped_udis.csv"))
 
 data$summarise_characteristics <- data$summarise_characteristics |>
+  mutate("variable_name" = if_else(grepl("Udi", variable_name), "Device characteristics", variable_name)) |>
   splitAdditional() |>
   left_join(udi_tibble |>
-              select("udi", "device_name", "catalogue_number", "manufacturer"), by = "udi") |>
-  mutate(across(c("device_name", "catalogue_number", "manufacturer"), ~coalesce(., "overall"))) |>
-  uniteAdditional(c("udi", "device_name", "catalogue_number", "manufacturer"))
+              select("source", "manufacturer", "device_name", "catalogue_number", "udi"), by = "udi") |>
+  mutate(across(c("source", "manufacturer", "device_name", "catalogue_number"), ~coalesce(., "overall"))) |>
+  uniteAdditional(c("source", "manufacturer", "device_name", "catalogue_number", "udi"))
 
 results <- bind(data)
 
