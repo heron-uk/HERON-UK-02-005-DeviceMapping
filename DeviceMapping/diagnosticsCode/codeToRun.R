@@ -65,4 +65,9 @@ cdm <- cdmFromCon(
 )
 
 # Run study ----
+# proce
+procedures <- c("hemiarthroplasty",
+                "mesh",
+                "pacemaker",
+                "lens")
 source(here("runStudy.R"))
