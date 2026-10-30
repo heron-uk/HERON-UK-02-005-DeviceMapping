@@ -17,6 +17,7 @@ cdm$hemi <- conceptCohort(cdm,
                           conceptSet = codes[str_detect(names(codes), "hemi")],
                           name = "hemi",
                           exit = "event_start_date")
+
 cdm$hemi_post_fx <- cdm$hemi |>
   requireIsFirstEntry(name = "hemi_post_fx") |>
   requireCohortIntersect("hip_fx",
@@ -33,11 +34,16 @@ cdm$femoral_head <- conceptCohort(cdm,
                                   name = "femoral_head",
                                   exit = "event_start_date")
 # udi  -----
-# custom cohorts using udi field....
+cdm$hip_udi <- customCohort(cdm,
+                             table = "device_exposure",
+                             field = "unique_device_id",
+                             values = udi,
+                             name = "hip_udi")
 
 # bind -----
 cdm <- bind(cdm$hip_fx,
             cdm$hemi,
             cdm$hemi_post_fx,
             cdm$femoral_head,
+            cdm$hip_udi,
             name = "study_cohorts")
