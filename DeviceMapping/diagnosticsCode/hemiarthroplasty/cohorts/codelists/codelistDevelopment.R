@@ -119,11 +119,11 @@ readr::write_csv(tibble(udi = depuy_self_centering_udi_codes),
 readr::write_csv(tibble(udi = depuy_biolox_delta_udi_codes),
                  here::here("hemiarthroplasty", "cohorts","udi", "depuy_biolox_delta_udi.csv"))
 readr::write_csv(tibble(udi = depuy_articul_eze_udi_codes),
-                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_articul_eze_udi_udi.csv"))
+                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_articul_eze_udi.csv"))
 readr::write_csv(tibble(udi = depuy_c_stem),
-                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_c_stem.csv"))
+                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_c_stem_udi.csv"))
 readr::write_csv(tibble(udi = depuy_corail),
-                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_corail.csv"))
+                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_corail_udi.csv"))
 
 
 
