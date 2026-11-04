@@ -9,9 +9,9 @@ logMessage("LOG CREATED")
 
 
 # cohorts ----
-if("hemiarthroplasty" %in% procedures_to_run){
-  logMessage("GETTING HEMIARTHROPLASTY COHORTS")
-  source(here("hemiarthroplasty", "cohorts", "instantiateCohorts.R"))
+if("hip" %in% procedures_to_run){
+  logMessage("GETTING HIP COHORTS")
+  source(here("hip", "cohorts", "instantiateCohorts.R"))
 }
 if("lens" %in% procedures_to_run){
   logMessage("GETTING LENS COHORTS")
@@ -33,7 +33,8 @@ cdm <- do.call(
 
 # run ----
 logMessage("Running PhenotypeDiagnostics")
-diagnostics <- phenotypeDiagnostics(cdm$study_cohorts)
+diagnostics <- phenotypeDiagnostics(cdm$study_cohorts,
+                                    cohortDiagnostics = list(compareCohorts = TRUE))
 exportSummarisedResult(diagnostics,
                        minCellCount = minCellCount,
                        fileName = "phenotyper_results_{cdm_name}_{date}.csv",

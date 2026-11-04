@@ -1,6 +1,6 @@
 
-codes <- importCodelist(here::here("hemiarthroplasty", "cohorts", "codelists"))
-udi_files <- list.files(path = here::here("hemiarthroplasty","cohorts", "udi"),
+codes <- importCodelist(here::here("hip", "cohorts", "codelists"))
+udi_files <- list.files(path = here::here("hip","cohorts", "udi"),
                         pattern = "\\.csv$", full.names = TRUE)
 udi <- udi_files |>
   set_names(tools::file_path_sans_ext(basename(udi_files))) |>
@@ -36,4 +36,6 @@ cdm <- bind(cdm$diagnoses,
             cdm$procedures,
             cdm$devices,
             cdm$hip_udi,
-            name = "hemiarthroplasty")
+            name = "hip")
+attr(cdm$hip, "cohort_set") <- attr(cdm$hip, "cohort_set") |>
+  mutate(group = "hip")

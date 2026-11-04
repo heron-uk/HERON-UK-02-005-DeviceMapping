@@ -37,3 +37,5 @@ cdm <- bind(cdm$diagnoses,
             cdm$devices,
             cdm$lens_udi,
             name = "lens")
+attr(cdm$lens, "cohort_set") <- attr(cdm$lens, "cohort_set") |>
+  mutate(group = "lens")

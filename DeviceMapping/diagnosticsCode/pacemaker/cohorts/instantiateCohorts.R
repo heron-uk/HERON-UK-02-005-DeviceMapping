@@ -38,3 +38,5 @@ cdm <- bind(cdm$diagnoses,
             cdm$devices,
             cdm$pacemaker_udi,
             name = "pacemaker")
+attr(cdm$pacemaker, "cohort_set") <- attr(cdm$pacemaker, "cohort_set") |>
+  mutate(group = "pacemaker")
