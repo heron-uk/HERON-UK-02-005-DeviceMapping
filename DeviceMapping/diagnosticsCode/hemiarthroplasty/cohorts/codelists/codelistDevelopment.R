@@ -75,7 +75,8 @@ depuy_articul_eze_udi_codes <- c(10603295033103,
                                  10603295033080,
                                  10603295033349,
                                  10603295033356) |> as.character()
-biomet_hip_system_udi_codes <- c(00887868308277) |> as.character()
+biomet_hip_system_udi_codes <- c(00887868308277,
+                                 00880304197169) |> as.character()
 
 depuy_c_stem <- c(10603295059608,
                   10603295059615,
@@ -96,7 +97,7 @@ depuy_corail <- c(10603295168683,
                   10603295168713,
                   10603295168898) |> as.character()
 
-
+exactech_acumatch_l_series <- c(10885862009524) |> as.character()
 
 # export codelists
 list(hip_fx = hip_fx_codes,
