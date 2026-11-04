@@ -36,7 +36,7 @@ femoral_head_metallic_codes <- 45758713
 
 femur_prosthesis_codes <- c(45760762, # Uncoated hip femur prosthesis, modular
                             45772469 # Coated hip femur prosthesis, modular
-                            )
+)
 femur_prosthesis_uncoated_codes <- c(45760762)
 femur_prosthesis_coated_codes <- c(45772469)
 
@@ -71,6 +71,27 @@ depuy_articul_eze_udi_codes <- c(10603295033103,
                                  10603295033127,
                                  10603295033080) |> as.character()
 
+depuy_c_stem <- c(10603295059608,
+                  10603295059615,
+                  10603295059592,
+                  10603295059639,
+                  10603295060307,
+                  10603295060291,
+                  10603295060284,
+                  10603295060321,
+                  10603295059646) |> as.character()
+depuy_corail <- c(10603295168683,
+                  10603295168676,
+                  10603295168669,
+                  10603295168690,
+                  10603295168706,
+                  10603295168768,
+                  10603295168775,
+                  10603295168713,
+                  10603295168898) |> as.character()
+
+
+
 # export codelists
 list(hip_fx = hip_fx_codes,
      hip_oa = hip_oa_codes,
@@ -99,5 +120,10 @@ readr::write_csv(tibble(udi = depuy_biolox_delta_udi_codes),
                  here::here("hemiarthroplasty", "cohorts","udi", "depuy_biolox_delta_udi.csv"))
 readr::write_csv(tibble(udi = depuy_articul_eze_udi_codes),
                  here::here("hemiarthroplasty", "cohorts","udi", "depuy_articul_eze_udi_udi.csv"))
+readr::write_csv(tibble(udi = depuy_c_stem),
+                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_c_stem.csv"))
+readr::write_csv(tibble(udi = depuy_corail),
+                 here::here("hemiarthroplasty", "cohorts","udi", "depuy_corail.csv"))
+
 
 
