@@ -34,8 +34,6 @@ cdm <- do.call(
 # run ----
 logMessage("Running PhenotypeDiagnostics")
 diagnostics <- phenotypeDiagnostics(cdm$study_cohorts)
-# diagnostics <- phenotypeDiagnostics(cdm$study_cohort,
-#                                     codelistDiagnostics = list(deviceDiagnostics = TRUE)) # udi summary by snomed code
 exportSummarisedResult(diagnostics,
                        minCellCount = minCellCount,
                        fileName = "phenotyper_results_{cdm_name}_{date}.csv",

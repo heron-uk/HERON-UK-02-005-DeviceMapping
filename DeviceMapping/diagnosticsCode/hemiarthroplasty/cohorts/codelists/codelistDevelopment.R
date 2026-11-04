@@ -62,14 +62,20 @@ depuy_biolox_delta_udi_codes <- c(10603295033448,
                                   10603295033615,
                                   10603295033271,
                                   10603295033295,
-                                  10603295033639) |> as.character()
+                                  10603295033639)
+zimmer_biolox_delta_udi_codes <- c(00889024430327,
+                                   00889024430310,
+                                   00889024430334) |> as.character()
 depuy_articul_eze_udi_codes <- c(10603295033103,
                                  10603295033066,
                                  10603295033189,
                                  10603295033172,
                                  10603295033196,
                                  10603295033127,
-                                 10603295033080) |> as.character()
+                                 10603295033080,
+                                 10603295033349,
+                                 10603295033356) |> as.character()
+biomet_hip_system_udi_codes <- c(00887868308277) |> as.character()
 
 depuy_c_stem <- c(10603295059608,
                   10603295059615,
@@ -118,8 +124,12 @@ readr::write_csv(tibble(udi = depuy_self_centering_udi_codes),
                  here::here("hemiarthroplasty", "cohorts","udi", "depuy_self_centering_udi.csv"))
 readr::write_csv(tibble(udi = depuy_biolox_delta_udi_codes),
                  here::here("hemiarthroplasty", "cohorts","udi", "depuy_biolox_delta_udi.csv"))
+readr::write_csv(tibble(udi = zimmer_biolox_delta_udi_codes),
+                 here::here("hemiarthroplasty", "cohorts","udi", "zimmer_biolox_delta_udi.csv"))
 readr::write_csv(tibble(udi = depuy_articul_eze_udi_codes),
                  here::here("hemiarthroplasty", "cohorts","udi", "depuy_articul_eze_udi.csv"))
+readr::write_csv(tibble(udi = biomet_hip_system_udi_codes),
+                 here::here("hemiarthroplasty", "cohorts","udi", "biomet_hip_system_udi.csv"))
 readr::write_csv(tibble(udi = depuy_c_stem),
                  here::here("hemiarthroplasty", "cohorts","udi", "depuy_c_stem_udi.csv"))
 readr::write_csv(tibble(udi = depuy_corail),
