@@ -73,7 +73,6 @@ list(cataract = cataract_codes,
   exportCodelist(here::here("lens", "cohorts","codelists"), type = "csv")
 
 # export udi
-# export udi
 readr::write_csv(tibble(udi = bl_sofport_iol_udi_codes),
                  here::here("lens", "cohorts","udi", "bl_sofport_iol_udi_codes.csv"))
 readr::write_csv(tibble(udi = bl_akreos_micro_udi_codes),
