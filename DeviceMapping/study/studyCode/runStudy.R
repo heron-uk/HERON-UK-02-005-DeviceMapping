@@ -71,6 +71,7 @@ for(i in seq_along(mapped)){
 
 # summary of udi -----
 logMessage("udi summary")
+
 results[["udi_standard_source"]] <- cdm$device_exposure |>
   mutate(year = clock::get_year(device_exposure_start_date),
          # to ensure they don't get silently ignored
@@ -79,10 +80,17 @@ results[["udi_standard_source"]] <- cdm$device_exposure |>
          unique_device_id = dplyr::coalesce(as.character(unique_device_id), "unknown")) |>
   addConceptName("device_concept_id") |>
   addConceptName("device_source_concept_id") |>
+  left_join(cdm$concept |>
+              select("device_source_concept_id"="concept_id",
+                     "device_source_concept_code" = "concept_code"),
+            by = c("device_source_concept_id")) |>
   summariseResult(variables = character(),
                   group = c("device_concept_id",
                             "device_concept_id_name",
-                            "unique_device_id"))
+                            "unique_device_id",
+                            "device_source_concept_id",
+                            "device_source_concept_code",
+                            "device_source_value"))
 
 # case studies -----
 logMessage("Characterise top selected standard device concepts")
