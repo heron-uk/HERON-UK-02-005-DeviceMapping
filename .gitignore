@@ -2,10 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
-DeviceMapping/DeviceMapping.Rproj
-DeviceMapping/shiny/data/studyData.RData
-DeviceMapping/shiny/rawData/*.csv
-DeviceMapping/shiny/report.docx
-DeviceMapping/diagnosticsShiny/data/raw/*.csv
-DeviceMapping/diagnosticsShiny/data/*.qs
-DeviceMapping/diagnosticsShiny/rsconnect/shinyapps.io/dpa-pde-oxford/*.dcf
+DeviceMapping.Rproj
+shiny/data/studyData.RData
+shiny/rawData/*.csv
+shiny/report.docx
+study/results/*.csv
