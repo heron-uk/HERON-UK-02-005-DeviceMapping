@@ -72,7 +72,7 @@ for(i in seq_along(mapped)){
 # summary of udi -----
 logMessage("udi summary")
 
-cdm$device_exposure_expanded <- cdm$device_exposure |>
+results[["udi_standard_source"]] <- cdm$device_exposure |>
   mutate(year = clock::get_year(device_exposure_start_date),
          device_concept_id = dplyr::coalesce(device_concept_id, 0L),
          device_source_concept_id = dplyr::coalesce(device_source_concept_id, 0L),
@@ -83,8 +83,6 @@ cdm$device_exposure_expanded <- cdm$device_exposure |>
               select("device_source_concept_id"="concept_id",
                      "device_source_concept_code" = "concept_code"),
             by = c("device_source_concept_id")) |>
-  compute(name = "device_exposure_expanded")
-results[["udi_standard_source"]] <-  cdm$device_exposure_expanded |>
   summariseResult(variables = character(),
                   group = c("device_concept_id",
                             "device_concept_id_name",
