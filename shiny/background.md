@@ -4,12 +4,8 @@
 #   - bslib::card arguments.
 # you can have more information how to use this section on the background
 # vingette
-header: "This is the header of the background"
 -----
 
-# Title
-## subtitle
-content
+# Device mapping summary
 
-![](ohdsi_logo.svg){width=100px}
 

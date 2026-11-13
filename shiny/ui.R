@@ -19,23 +19,23 @@ ui <- bslib::page_navbar(
     icon = shiny::icon("book-atlas"),
     backgroundCard("background.md")
   ),
-  bslib::nav_panel(
-    title = "Summary",
-    icon = shiny::icon("file-alt"),
-    bslib::card(
-      bslib::card_header("Explore results"),
-      shiny::tags$div(
-        class = "mb-2",
-        shinyTree::shinyTree("summary_cdm_name", theme = "proton", themeIcons = FALSE),
-        shinyTree::shinyTree("summary_packages", theme = "proton", themeIcons = FALSE),
-        shinyTree::shinyTree("summary_min_cell_count", theme = "proton", themeIcons = FALSE),
-        shinyTree::shinyTree("summary_panels", theme = "proton", themeIcons = FALSE)
-      ),
-      full_screen = TRUE
-    )
-  ),
+  # bslib::nav_panel(
+  #   title = "Summary",
+  #   icon = shiny::icon("file-alt"),
+  #   bslib::card(
+  #     bslib::card_header("Explore results"),
+  #     shiny::tags$div(
+  #       class = "mb-2",
+  #       shinyTree::shinyTree("summary_cdm_name", theme = "proton", themeIcons = FALSE),
+  #       shinyTree::shinyTree("summary_packages", theme = "proton", themeIcons = FALSE),
+  #       shinyTree::shinyTree("summary_min_cell_count", theme = "proton", themeIcons = FALSE),
+  #       shinyTree::shinyTree("summary_panels", theme = "proton", themeIcons = FALSE)
+  #     ),
+  #     full_screen = TRUE
+  #   )
+  # ),
   bslib::nav_menu(
-    title = "OmopSketch",
+    title = "Overview of databases",
     icon = shiny::icon("list"),
     bslib::nav_panel(
       title = "Snapshot",
@@ -128,9 +128,13 @@ ui <- bslib::page_navbar(
           )
         )
       )
+    )
     ),
+    bslib::nav_menu(
+      title = "Device exposure table",
+      icon = shiny::icon("list"),
     bslib::nav_panel(
-      title = "Clinical Tables Summary",
+      title = "Table summary",
       icon = shiny::icon("bars-staggered"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
@@ -238,7 +242,7 @@ ui <- bslib::page_navbar(
       )
     ),
     bslib::nav_panel(
-      title = "Trends",
+      title = "Device record trends",
       icon = shiny::icon("arrow-trend-up"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
@@ -450,128 +454,128 @@ ui <- bslib::page_navbar(
       )
     )
   ),
+  # bslib::nav_panel(
+  #   title = "Logs",
+  #   icon = shiny::icon("clipboard-list"),
+  #   bslib::layout_sidebar(
+  #     sidebar = bslib::sidebar(
+  #       bslib::card(
+  #         class = "sticky-top-btn update-card",
+  #         bslib::card_body(
+  #           class = "p-3",
+  #           shiny::actionButton(
+  #             inputId = "update_summarise_log_file",
+  #             label = "Update content",
+  #             icon = shiny::icon("rotate"),
+  #             width = "100%",
+  #             class = "btn-primary"
+  #           ),
+  #           uiOutput(outputId = "update_message_summarise_log_file")
+  #         )
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_file_cdm_name",
+  #         label = "CDM name",
+  #         choices = choices$summarise_log_file_cdm_name,
+  #         selected = selected$summarise_log_file_cdm_name,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_file_variable_name",
+  #         label = "Variable name",
+  #         choices = choices$summarise_log_file_variable_name,
+  #         selected = selected$summarise_log_file_variable_name,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       position = "left"
+  #     ),
+  #     bslib::navset_card_tab(
+  #       bslib::nav_panel(
+  #         title = "Table Logs",
+  #         bslib::card(
+  #           full_screen = TRUE,
+  #           bslib::card_header(
+  #             bslib::popover(
+  #               shiny::icon("download"),
+  #               shinyWidgets::pickerInput(
+  #                 inputId = "summarise_log_file_table_format",
+  #                 label = "Format",
+  #                 choices = c("docx", "png", "pdf", "html"),
+  #                 selected = "docx",
+  #                 multiple = FALSE,
+  #                 options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #               ),
+  #               shiny::downloadButton(outputId = "summarise_log_file_table_download", label = "Download table")
+  #             ),
+  #             class = "text-end"
+  #           ),
+  #           gt::gt_output("summarise_log_file_table") |>
+  #             shinycssloaders::withSpinner()
+  #         )
+  #       ),
+  #       bslib::nav_panel(
+  #         title = "Plot Timing",
+  #         bslib::card(
+  #           full_screen = TRUE,
+  #           bslib::card_header(
+  #             bslib::popover(
+  #               shiny::icon("download"),
+  #               shiny::numericInput(
+  #                 inputId = "summarise_log_file_plot_width",
+  #                 label = "Width",
+  #                 value = 15
+  #               ),
+  #               shiny::numericInput(
+  #                 inputId = "summarise_log_file_plot_height",
+  #                 label = "Height",
+  #                 value = 15
+  #               ),
+  #               shinyWidgets::pickerInput(
+  #                 inputId = "summarise_log_file_plot_units",
+  #                 label = "Units",
+  #                 choices = c("px", "cm", "inch"),
+  #                 selected = "cm",
+  #                 multiple = FALSE,
+  #                 options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #               ),
+  #               shiny::numericInput(
+  #                 inputId = "summarise_log_file_plot_dpi",
+  #                 label = "DPI",
+  #                 value = 300
+  #               ),
+  #               shiny::downloadButton(outputId = "summarise_log_file_plot_download", label = "Download plot")
+  #             ),
+  #             class = "text-end"
+  #           ),
+  #           bslib::layout_sidebar(
+  #             sidebar = bslib::sidebar(
+  #               shinyWidgets::materialSwitch(
+  #                 inputId = "summarise_log_file_plot_interactive",
+  #                 label = "Interactive",
+  #                 value = TRUE
+  #               ),
+  #               shinyWidgets::pickerInput(
+  #                 inputId = "summarise_log_file_plot_position",
+  #                 label = "Columns",
+  #                 choices = c("dodge", "stack"),
+  #                 selected = "stack",
+  #                 multiple = FALSE,
+  #                 options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #               ),
+  #               position = "right"
+  #             ),
+  #             shiny::uiOutput("summarise_log_file_plot") |>
+  #               shinycssloaders::withSpinner()
+  #           )
+  #         )
+  #       )
+  #     )
+  #   )
+  # ),
   bslib::nav_panel(
-    title = "Logs",
-    icon = shiny::icon("clipboard-list"),
-    bslib::layout_sidebar(
-      sidebar = bslib::sidebar(
-        bslib::card(
-          class = "sticky-top-btn update-card",
-          bslib::card_body(
-            class = "p-3",
-            shiny::actionButton(
-              inputId = "update_summarise_log_file",
-              label = "Update content",
-              icon = shiny::icon("rotate"),
-              width = "100%",
-              class = "btn-primary"
-            ),
-            uiOutput(outputId = "update_message_summarise_log_file")
-          )
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_file_cdm_name",
-          label = "CDM name",
-          choices = choices$summarise_log_file_cdm_name,
-          selected = selected$summarise_log_file_cdm_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_file_variable_name",
-          label = "Variable name",
-          choices = choices$summarise_log_file_variable_name,
-          selected = selected$summarise_log_file_variable_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        position = "left"
-      ),
-      bslib::navset_card_tab(
-        bslib::nav_panel(
-          title = "Table Logs",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_file_table_format",
-                  label = "Format",
-                  choices = c("docx", "png", "pdf", "html"),
-                  selected = "docx",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                ),
-                shiny::downloadButton(outputId = "summarise_log_file_table_download", label = "Download table")
-              ),
-              class = "text-end"
-            ),
-            gt::gt_output("summarise_log_file_table") |>
-              shinycssloaders::withSpinner()
-          )
-        ),
-        bslib::nav_panel(
-          title = "Plot Timing",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shiny::numericInput(
-                  inputId = "summarise_log_file_plot_width",
-                  label = "Width",
-                  value = 15
-                ),
-                shiny::numericInput(
-                  inputId = "summarise_log_file_plot_height",
-                  label = "Height",
-                  value = 15
-                ),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_file_plot_units",
-                  label = "Units",
-                  choices = c("px", "cm", "inch"),
-                  selected = "cm",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                ),
-                shiny::numericInput(
-                  inputId = "summarise_log_file_plot_dpi",
-                  label = "DPI",
-                  value = 300
-                ),
-                shiny::downloadButton(outputId = "summarise_log_file_plot_download", label = "Download plot")
-              ),
-              class = "text-end"
-            ),
-            bslib::layout_sidebar(
-              sidebar = bslib::sidebar(
-                shinyWidgets::materialSwitch(
-                  inputId = "summarise_log_file_plot_interactive",
-                  label = "Interactive",
-                  value = TRUE
-                ),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_file_plot_position",
-                  label = "Columns",
-                  choices = c("dodge", "stack"),
-                  selected = "stack",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                ),
-                position = "right"
-              ),
-              shiny::uiOutput("summarise_log_file_plot") |>
-                shinycssloaders::withSpinner()
-            )
-          )
-        )
-      )
-    )
-  ),
-  bslib::nav_panel(
-    title = "Summarise table",
+    title = "Device concepts",
     icon = shiny::icon("folder"),
     bslib::layout_sidebar(
       sidebar = bslib::sidebar(
@@ -625,7 +629,7 @@ ui <- bslib::page_navbar(
       ),
       bslib::navset_card_tab(
         bslib::nav_panel(
-          title = "Tidy",
+          title = "Concepts",
           bslib::card(
             full_screen = TRUE,
             bslib::card_header(
@@ -657,249 +661,253 @@ ui <- bslib::page_navbar(
             )
           )
         ),
-        bslib::nav_panel(
-          title = "Table",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_table_table_format",
-                  label = "Format",
-                  choices = c("docx", "png", "pdf", "html"),
-                  selected = "docx",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                ),
-                shiny::downloadButton(outputId = "summarise_table_table_download", label = "Download table")
-              ),
-              class = "text-end"
-            ),
-            bslib::layout_sidebar(
-              sidebar = bslib::sidebar(
-                sortable::bucket_list(
-                  header = NULL,
-                  sortable::add_rank_list(
-                    text = "None",
-                    labels = c("cdm_name", "device_concept_id", "device_concept_id_name", "unique_device_id", "device_source_concept_id", "device_source_concept_code", "device_source_value", "variable_name", "variable_level", "estimate_name"),
-                    input_id = "summarise_table_table_none"
-                  ),
-                  sortable::add_rank_list(
-                    text = "Header",
-                    labels = character(),
-                    input_id = "summarise_table_table_header"
-                  ),
-                  sortable::add_rank_list(
-                    text = "Group columns",
-                    labels = character(),
-                    input_id = "summarise_table_table_group_column"
-                  ),
-                  sortable::add_rank_list(
-                    text = "Hide",
-                    labels = character(),
-                    input_id = "summarise_table_table_hide"
-                  )
-                ),
-                position = "right"
-              ),
-              gt::gt_output("summarise_table_table") |>
-                shinycssloaders::withSpinner()
-            )
-          )
-        )
+        
+        
+        # bslib::nav_panel(
+        #   title = "Table",
+        #   bslib::card(
+        #     full_screen = TRUE,
+        #     bslib::card_header(
+        #       bslib::popover(
+        #         shiny::icon("download"),
+        #         shinyWidgets::pickerInput(
+        #           inputId = "summarise_table_table_format",
+        #           label = "Format",
+        #           choices = c("docx", "png", "pdf", "html"),
+        #           selected = "docx",
+        #           multiple = FALSE,
+        #           options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+        #         ),
+        #         shiny::downloadButton(outputId = "summarise_table_table_download", label = "Download table")
+        #       ),
+        #       class = "text-end"
+        #     ),
+        #     bslib::layout_sidebar(
+        #       sidebar = bslib::sidebar(
+        #         sortable::bucket_list(
+        #           header = NULL,
+        #           sortable::add_rank_list(
+        #             text = "None",
+        #             labels = c("cdm_name", "device_concept_id", "device_concept_id_name", "unique_device_id", "device_source_concept_id", "device_source_concept_code", "device_source_value", "variable_name", "variable_level", "estimate_name"),
+        #             input_id = "summarise_table_table_none"
+        #           ),
+        #           sortable::add_rank_list(
+        #             text = "Header",
+        #             labels = character(),
+        #             input_id = "summarise_table_table_header"
+        #           ),
+        #           sortable::add_rank_list(
+        #             text = "Group columns",
+        #             labels = character(),
+        #             input_id = "summarise_table_table_group_column"
+        #           ),
+        #           sortable::add_rank_list(
+        #             text = "Hide",
+        #             labels = character(),
+        #             input_id = "summarise_table_table_hide"
+        #           )
+        #         ),
+        #         position = "right"
+        #       ),
+        #       gt::gt_output("summarise_table_table") |>
+        #         shinycssloaders::withSpinner()
+        #     )
+        #   )
+        # )
       )
     )
   ),
-  bslib::nav_panel(
-    title = "Summarise log sql",
-    icon = shiny::icon("folder"),
-    bslib::layout_sidebar(
-      sidebar = bslib::sidebar(
-        bslib::card(
-          class = "sticky-top-btn update-card",
-          bslib::card_body(
-            class = "p-3",
-            shiny::actionButton(
-              inputId = "update_summarise_log_sql",
-              label = "Update content",
-              icon = shiny::icon("rotate"),
-              width = "100%",
-              class = "btn-primary"
-            ),
-            uiOutput(outputId = "update_message_summarise_log_sql")
-          )
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_cdm_name",
-          label = "CDM name",
-          choices = choices$summarise_log_sql_cdm_name,
-          selected = selected$summarise_log_sql_cdm_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_log_id",
-          label = "Log id",
-          choices = choices$summarise_log_sql_log_id,
-          selected = selected$summarise_log_sql_log_id,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_type",
-          label = "Type",
-          choices = choices$summarise_log_sql_type,
-          selected = selected$summarise_log_sql_type,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_name",
-          label = "Name",
-          choices = choices$summarise_log_sql_name,
-          selected = selected$summarise_log_sql_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_temporary",
-          label = "Temporary",
-          choices = choices$summarise_log_sql_temporary,
-          selected = selected$summarise_log_sql_temporary,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_overwrite",
-          label = "Overwrite",
-          choices = choices$summarise_log_sql_overwrite,
-          selected = selected$summarise_log_sql_overwrite,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_variable_name",
-          label = "Variable name",
-          choices = choices$summarise_log_sql_variable_name,
-          selected = selected$summarise_log_sql_variable_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_estimate_name",
-          label = "Estimate name",
-          choices = choices$summarise_log_sql_estimate_name,
-          selected = selected$summarise_log_sql_estimate_name,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_prefix",
-          label = "Prefix",
-          choices = choices$summarise_log_sql_prefix,
-          selected = selected$summarise_log_sql_prefix,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        shinyWidgets::pickerInput(
-          inputId = "summarise_log_sql_schema",
-          label = "Schema",
-          choices = choices$summarise_log_sql_schema,
-          selected = selected$summarise_log_sql_schema,
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-        ),
-        position = "left"
-      ),
-      bslib::navset_card_tab(
-        bslib::nav_panel(
-          title = "Tidy",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shiny::downloadButton(outputId = "summarise_log_sql_tidy_download", label = "Download csv")
-              ),
-              class = "text-end"
-            ),
-            bslib::layout_sidebar(
-              sidebar = bslib::sidebar(
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_sql_tidy_columns",
-                  label = "Columns",
-                  choices = c("cdm_name", "log_id", "type", "name", "temporary", "overwrite", "prefix", "schema", "variable_name", "variable_level"),
-                  selected = c("cdm_name", "log_id", "type", "name", "temporary", "overwrite", "variable_name", "variable_level"),
-                  multiple = TRUE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                ),
-                shiny::checkboxInput(
-                  inputId = "summarise_log_sql_tidy_pivot_estimates",
-                  label = "Pivot estimates",
-                  value = TRUE
-                ),
-                position = "right"
-              ),
-              DT::DTOutput("summarise_log_sql_tidy") |>
-                shinycssloaders::withSpinner()
-            )
-          )
-        ),
-        bslib::nav_panel(
-          title = "Table",
-          bslib::card(
-            full_screen = TRUE,
-            bslib::card_header(
-              bslib::popover(
-                shiny::icon("download"),
-                shinyWidgets::pickerInput(
-                  inputId = "summarise_log_sql_table_format",
-                  label = "Format",
-                  choices = c("docx", "png", "pdf", "html"),
-                  selected = "docx",
-                  multiple = FALSE,
-                  options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                ),
-                shiny::downloadButton(outputId = "summarise_log_sql_table_download", label = "Download table")
-              ),
-              class = "text-end"
-            ),
-            bslib::layout_sidebar(
-              sidebar = bslib::sidebar(
-                sortable::bucket_list(
-                  header = NULL,
-                  sortable::add_rank_list(
-                    text = "None",
-                    labels = c("cdm_name", "log_id", "type", "name", "temporary", "overwrite", "prefix", "schema", "variable_name", "variable_level", "estimate_name"),
-                    input_id = "summarise_log_sql_table_none"
-                  ),
-                  sortable::add_rank_list(
-                    text = "Header",
-                    labels = character(),
-                    input_id = "summarise_log_sql_table_header"
-                  ),
-                  sortable::add_rank_list(
-                    text = "Group columns",
-                    labels = character(),
-                    input_id = "summarise_log_sql_table_group_column"
-                  ),
-                  sortable::add_rank_list(
-                    text = "Hide",
-                    labels = character(),
-                    input_id = "summarise_log_sql_table_hide"
-                  )
-                ),
-                position = "right"
-              ),
-              gt::gt_output("summarise_log_sql_table") |>
-                shinycssloaders::withSpinner()
-            )
-          )
-        )
-      )
-    )
-  ),
+  
+  
+  # bslib::nav_panel(
+  #   title = "Summarise log sql",
+  #   icon = shiny::icon("folder"),
+  #   bslib::layout_sidebar(
+  #     sidebar = bslib::sidebar(
+  #       bslib::card(
+  #         class = "sticky-top-btn update-card",
+  #         bslib::card_body(
+  #           class = "p-3",
+  #           shiny::actionButton(
+  #             inputId = "update_summarise_log_sql",
+  #             label = "Update content",
+  #             icon = shiny::icon("rotate"),
+  #             width = "100%",
+  #             class = "btn-primary"
+  #           ),
+  #           uiOutput(outputId = "update_message_summarise_log_sql")
+  #         )
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_cdm_name",
+  #         label = "CDM name",
+  #         choices = choices$summarise_log_sql_cdm_name,
+  #         selected = selected$summarise_log_sql_cdm_name,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_log_id",
+  #         label = "Log id",
+  #         choices = choices$summarise_log_sql_log_id,
+  #         selected = selected$summarise_log_sql_log_id,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_type",
+  #         label = "Type",
+  #         choices = choices$summarise_log_sql_type,
+  #         selected = selected$summarise_log_sql_type,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_name",
+  #         label = "Name",
+  #         choices = choices$summarise_log_sql_name,
+  #         selected = selected$summarise_log_sql_name,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_temporary",
+  #         label = "Temporary",
+  #         choices = choices$summarise_log_sql_temporary,
+  #         selected = selected$summarise_log_sql_temporary,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_overwrite",
+  #         label = "Overwrite",
+  #         choices = choices$summarise_log_sql_overwrite,
+  #         selected = selected$summarise_log_sql_overwrite,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_variable_name",
+  #         label = "Variable name",
+  #         choices = choices$summarise_log_sql_variable_name,
+  #         selected = selected$summarise_log_sql_variable_name,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_estimate_name",
+  #         label = "Estimate name",
+  #         choices = choices$summarise_log_sql_estimate_name,
+  #         selected = selected$summarise_log_sql_estimate_name,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_prefix",
+  #         label = "Prefix",
+  #         choices = choices$summarise_log_sql_prefix,
+  #         selected = selected$summarise_log_sql_prefix,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       shinyWidgets::pickerInput(
+  #         inputId = "summarise_log_sql_schema",
+  #         label = "Schema",
+  #         choices = choices$summarise_log_sql_schema,
+  #         selected = selected$summarise_log_sql_schema,
+  #         multiple = TRUE,
+  #         options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #       ),
+  #       position = "left"
+  #     ),
+  #     bslib::navset_card_tab(
+  #       bslib::nav_panel(
+  #         title = "Tidy",
+  #         bslib::card(
+  #           full_screen = TRUE,
+  #           bslib::card_header(
+  #             bslib::popover(
+  #               shiny::icon("download"),
+  #               shiny::downloadButton(outputId = "summarise_log_sql_tidy_download", label = "Download csv")
+  #             ),
+  #             class = "text-end"
+  #           ),
+  #           bslib::layout_sidebar(
+  #             sidebar = bslib::sidebar(
+  #               shinyWidgets::pickerInput(
+  #                 inputId = "summarise_log_sql_tidy_columns",
+  #                 label = "Columns",
+  #                 choices = c("cdm_name", "log_id", "type", "name", "temporary", "overwrite", "prefix", "schema", "variable_name", "variable_level"),
+  #                 selected = c("cdm_name", "log_id", "type", "name", "temporary", "overwrite", "variable_name", "variable_level"),
+  #                 multiple = TRUE,
+  #                 options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #               ),
+  #               shiny::checkboxInput(
+  #                 inputId = "summarise_log_sql_tidy_pivot_estimates",
+  #                 label = "Pivot estimates",
+  #                 value = TRUE
+  #               ),
+  #               position = "right"
+  #             ),
+  #             DT::DTOutput("summarise_log_sql_tidy") |>
+  #               shinycssloaders::withSpinner()
+  #           )
+  #         )
+  #       ),
+  #       bslib::nav_panel(
+  #         title = "Table",
+  #         bslib::card(
+  #           full_screen = TRUE,
+  #           bslib::card_header(
+  #             bslib::popover(
+  #               shiny::icon("download"),
+  #               shinyWidgets::pickerInput(
+  #                 inputId = "summarise_log_sql_table_format",
+  #                 label = "Format",
+  #                 choices = c("docx", "png", "pdf", "html"),
+  #                 selected = "docx",
+  #                 multiple = FALSE,
+  #                 options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+  #               ),
+  #               shiny::downloadButton(outputId = "summarise_log_sql_table_download", label = "Download table")
+  #             ),
+  #             class = "text-end"
+  #           ),
+  #           bslib::layout_sidebar(
+  #             sidebar = bslib::sidebar(
+  #               sortable::bucket_list(
+  #                 header = NULL,
+  #                 sortable::add_rank_list(
+  #                   text = "None",
+  #                   labels = c("cdm_name", "log_id", "type", "name", "temporary", "overwrite", "prefix", "schema", "variable_name", "variable_level", "estimate_name"),
+  #                   input_id = "summarise_log_sql_table_none"
+  #                 ),
+  #                 sortable::add_rank_list(
+  #                   text = "Header",
+  #                   labels = character(),
+  #                   input_id = "summarise_log_sql_table_header"
+  #                 ),
+  #                 sortable::add_rank_list(
+  #                   text = "Group columns",
+  #                   labels = character(),
+  #                   input_id = "summarise_log_sql_table_group_column"
+  #                 ),
+  #                 sortable::add_rank_list(
+  #                   text = "Hide",
+  #                   labels = character(),
+  #                   input_id = "summarise_log_sql_table_hide"
+  #                 )
+  #               ),
+  #               position = "right"
+  #             ),
+  #             gt::gt_output("summarise_log_sql_table") |>
+  #               shinycssloaders::withSpinner()
+  #           )
+  #         )
+  #       )
+  #     )
+  #   )
+  # ),
   bslib::nav_spacer(),
   bslib::nav_item(
     bslib::popover(

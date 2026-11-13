@@ -126,12 +126,29 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
   getSummariseClinicalRecordsTable <- shiny::reactive({
-    getSummariseClinicalRecordsData() |>
-      OmopSketch::tableClinicalRecords(
-        header = input$summarise_clinical_records_table_header,
-        groupColumn = input$summarise_clinical_records_table_group_column,
-        hide = input$summarise_clinical_records_table_hide
+    # getSummariseClinicalRecordsData() |>
+    #   OmopSketch::tableClinicalRecords(
+    #     header = input$summarise_clinical_records_table_header,
+    #     groupColumn = input$summarise_clinical_records_table_group_column,
+    #     hide = input$summarise_clinical_records_table_hide
+    #   )
+    
+    getSummariseClinicalRecordsData() |>   
+      arrange(cdm_name) |> 
+      mutate(variable_level = stringr::str_replace_all(variable_level,
+                                                       "_", " ")) |> 
+      mutate(variable_level = stringr::str_to_sentence(variable_level)) |> 
+      visOmopResults::visOmopTable(
+        header = "cdm_name",
+        estimateName = c(`N (%)` = "<count> (<percentage>%)", 
+                         N = "<count>", `Mean (SD)` = "<mean> (<sd>)", `Median [Q25 - Q75]` = "<median> [<q25> - <q75>]", 
+                         `Range [min to max]` = "[<min> to <max>]", `N missing data (%)` = "<na_count> (<na_percentage>%)", 
+                         `N zeros (%)` = "<zero_count> (<zero_percentage>%)"),
+        hide = c("omop_table",
+                 "type_concept_id",
+                 "is_required")
       )
+    
   })
   output$summarise_clinical_records_table <- gt::render_gt({
     getSummariseClinicalRecordsTable()
