@@ -67,12 +67,15 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
   getSummariseOmopSnapshotTable <- shiny::reactive({
-    getSummariseOmopSnapshotData() |>
-      OmopSketch::tableOmopSnapshot(
-        header = input$summarise_omop_snapshot_table_header,
-        groupColumn = input$summarise_omop_snapshot_table_group_column,
-        hide = input$summarise_omop_snapshot_table_hide
-      )
+    data[["summarise_omop_snapshot"]] |> 
+      filter(variable_name != "cdm_source") |> 
+      OmopSketch::tableOmopSnapshot()
+    # |>
+    #   OmopSketch::tableOmopSnapshot(
+    #     header = input$summarise_omop_snapshot_table_header,
+    #     groupColumn = input$summarise_omop_snapshot_table_group_column,
+    #     hide = input$summarise_omop_snapshot_table_hide
+    #   )
   })
   output$summarise_omop_snapshot_table <- gt::render_gt({
     getSummariseOmopSnapshotTable()

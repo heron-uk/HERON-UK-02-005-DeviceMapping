@@ -40,43 +40,44 @@ ui <- bslib::page_navbar(
     bslib::nav_panel(
       title = "Snapshot",
       icon = shiny::icon("camera"),
-      bslib::layout_sidebar(
-        sidebar = bslib::sidebar(
-          bslib::card(
-            class = "sticky-top-btn update-card",
-            bslib::card_body(
-              class = "p-3",
-              shiny::actionButton(
-                inputId = "update_summarise_omop_snapshot",
-                label = "Update content",
-                icon = shiny::icon("rotate"),
-                width = "100%",
-                class = "btn-primary"
-              ),
-              uiOutput(outputId = "update_message_summarise_omop_snapshot")
-            )
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_omop_snapshot_cdm_name",
-            label = "CDM name",
-            choices = choices$summarise_omop_snapshot_cdm_name,
-            selected = selected$summarise_omop_snapshot_cdm_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_omop_snapshot_variable_name",
-            label = "Variable name",
-            choices = choices$summarise_omop_snapshot_variable_name,
-            selected = selected$summarise_omop_snapshot_variable_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          position = "left"
-        ),
-        bslib::navset_card_tab(
-          bslib::nav_panel(
-            title = "Table Snapshot",
+      
+      # bslib::layout_sidebar(
+        # sidebar = bslib::sidebar(
+        #   bslib::card(
+        #     class = "sticky-top-btn update-card",
+        #     bslib::card_body(
+        #       class = "p-3",
+        #       shiny::actionButton(
+        #         inputId = "update_summarise_omop_snapshot",
+        #         label = "Update content",
+        #         icon = shiny::icon("rotate"),
+        #         width = "100%",
+        #         class = "btn-primary"
+        #       ),
+        #       uiOutput(outputId = "update_message_summarise_omop_snapshot")
+        #     )
+        #   ),
+        #   shinyWidgets::pickerInput(
+        #     inputId = "summarise_omop_snapshot_cdm_name",
+        #     label = "CDM name",
+        #     choices = choices$summarise_omop_snapshot_cdm_name,
+        #     selected = selected$summarise_omop_snapshot_cdm_name,
+        #     multiple = TRUE,
+        #     options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+        #   ),
+        #   shinyWidgets::pickerInput(
+        #     inputId = "summarise_omop_snapshot_variable_name",
+        #     label = "Variable name",
+        #     choices = choices$summarise_omop_snapshot_variable_name,
+        #     selected = selected$summarise_omop_snapshot_variable_name,
+        #     multiple = TRUE,
+        #     options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+        #   ),
+        #   position = "left"
+        # ),
+        # bslib::navset_card_tab(
+          # bslib::nav_panel(
+            # title = "Table Snapshot",
             bslib::card(
               full_screen = TRUE,
               bslib::card_header(
@@ -94,40 +95,41 @@ ui <- bslib::page_navbar(
                 ),
                 class = "text-end"
               ),
-              bslib::layout_sidebar(
-                sidebar = bslib::sidebar(
-                  sortable::bucket_list(
-                    header = NULL,
-                    sortable::add_rank_list(
-                      text = "None",
-                      labels = "estimate_name",
-                      input_id = "summarise_omop_snapshot_table_none"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Header",
-                      labels = "cdm_name",
-                      input_id = "summarise_omop_snapshot_table_header"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Group columns",
-                      labels = "variable_name",
-                      input_id = "summarise_omop_snapshot_table_group_column"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Hide",
-                      labels = "variable_level",
-                      input_id = "summarise_omop_snapshot_table_hide"
-                    )
-                  ),
-                  position = "right"
-                ),
+              
+              # bslib::layout_sidebar(
+                # sidebar = bslib::sidebar(
+                #   sortable::bucket_list(
+                #     header = NULL,
+                #     sortable::add_rank_list(
+                #       text = "None",
+                #       labels = "estimate_name",
+                #       input_id = "summarise_omop_snapshot_table_none"
+                #     ),
+                #     sortable::add_rank_list(
+                #       text = "Header",
+                #       labels = "cdm_name",
+                #       input_id = "summarise_omop_snapshot_table_header"
+                #     ),
+                #     sortable::add_rank_list(
+                #       text = "Group columns",
+                #       labels = "variable_name",
+                #       input_id = "summarise_omop_snapshot_table_group_column"
+                #     ),
+                #     sortable::add_rank_list(
+                #       text = "Hide",
+                #       labels = "variable_level",
+                #       input_id = "summarise_omop_snapshot_table_hide"
+                #     )
+                #   ),
+                #   position = "right"
+                # ),
                 gt::gt_output("summarise_omop_snapshot_table") |>
                   shinycssloaders::withSpinner()
-              )
+              # )
             )
-          )
-        )
-      )
+          # )
+        # )
+      # )
     )
     ),
     bslib::nav_menu(
