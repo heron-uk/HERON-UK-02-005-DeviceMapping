@@ -269,117 +269,121 @@ ui <- bslib::page_navbar(
             selected = selected$summarise_trend_cdm_name,
             multiple = TRUE,
             options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_omop_table",
-            label = "Omop table",
-            choices = choices$summarise_trend_omop_table,
-            selected = selected$summarise_trend_omop_table,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_time_interval",
-            label = "Time interval",
-            choices = choices$summarise_trend_time_interval,
-            selected = selected$summarise_trend_time_interval,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_has_udi",
-            label = "Has udi",
-            choices = choices$summarise_trend_has_udi,
-            selected = selected$summarise_trend_has_udi,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_interval",
-            label = "Interval",
-            choices = choices$summarise_trend_interval,
-            selected = selected$summarise_trend_interval,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_mapped_to_standard",
-            label = "Mapped to standard",
-            choices = choices$summarise_trend_mapped_to_standard,
-            selected = selected$summarise_trend_mapped_to_standard,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_type",
-            label = "Type",
-            choices = choices$summarise_trend_type,
-            selected = selected$summarise_trend_type,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_variable_name",
-            label = "Variable name",
-            choices = choices$summarise_trend_variable_name,
-            selected = selected$summarise_trend_variable_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
-          shinyWidgets::pickerInput(
-            inputId = "summarise_trend_estimate_name",
-            label = "Estimate name",
-            choices = choices$summarise_trend_estimate_name,
-            selected = selected$summarise_trend_estimate_name,
-            multiple = TRUE,
-            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-          ),
+          )
+          ,
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_omop_table",
+          #   label = "Omop table",
+          #   choices = choices$summarise_trend_omop_table,
+          #   selected = selected$summarise_trend_omop_table,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_time_interval",
+          #   label = "Time interval",
+          #   choices = choices$summarise_trend_time_interval,
+          #   selected = selected$summarise_trend_time_interval,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_has_udi",
+          #   label = "Has udi",
+          #   choices = choices$summarise_trend_has_udi,
+          #   selected = selected$summarise_trend_has_udi,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_interval",
+          #   label = "Interval",
+          #   choices = choices$summarise_trend_interval,
+          #   selected = selected$summarise_trend_interval,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_mapped_to_standard",
+          #   label = "Mapped to standard",
+          #   choices = choices$summarise_trend_mapped_to_standard,
+          #   selected = selected$summarise_trend_mapped_to_standard,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_type",
+          #   label = "Type",
+          #   choices = choices$summarise_trend_type,
+          #   selected = selected$summarise_trend_type,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_variable_name",
+          #   label = "Variable name",
+          #   choices = choices$summarise_trend_variable_name,
+          #   selected = selected$summarise_trend_variable_name,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
+          # shinyWidgets::pickerInput(
+          #   inputId = "summarise_trend_estimate_name",
+          #   label = "Estimate name",
+          #   choices = choices$summarise_trend_estimate_name,
+          #   selected = selected$summarise_trend_estimate_name,
+          #   multiple = TRUE,
+          #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+          # ),
           position = "left"
         ),
+        
+        
         bslib::navset_card_tab(
-          bslib::nav_panel(
-            title = "Table Trends",
-            bslib::card(
-              full_screen = TRUE,
-              bslib::card_header(
-                bslib::popover(
-                  shiny::icon("download"),
-                  shiny::downloadButton(outputId = "summarise_trend_table_download", label = "Download csv")
-                ),
-                class = "text-end"
-              ),
-              bslib::layout_sidebar(
-                sidebar = bslib::sidebar(
-                  sortable::bucket_list(
-                    header = NULL,
-                    sortable::add_rank_list(
-                      text = "None",
-                      labels = c("variable_name", "estimate_name", "time_interval"),
-                      input_id = "summarise_trend_table_none"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Header",
-                      labels = "cdm_name",
-                      input_id = "summarise_trend_table_header"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Group columns",
-                      labels = c("has_udi", "interval", "mapped_to_standard", "type", "omop_table"),
-                      input_id = "summarise_trend_table_group_column"
-                    ),
-                    sortable::add_rank_list(
-                      text = "Hide",
-                      labels = "variable_level",
-                      input_id = "summarise_trend_table_hide"
-                    )
-                  ),
-                  position = "right"
-                ),
-                reactable::reactableOutput("summarise_trend_table") |>
-                  shinycssloaders::withSpinner()
-              )
-            )
-          ),
+          
+          # bslib::nav_panel(
+          #   title = "Table Trends",
+          #   bslib::card(
+          #     full_screen = TRUE,
+          #     bslib::card_header(
+          #       bslib::popover(
+          #         shiny::icon("download"),
+          #         shiny::downloadButton(outputId = "summarise_trend_table_download", label = "Download csv")
+          #       ),
+          #       class = "text-end"
+          #     ),
+          #     bslib::layout_sidebar(
+          #       sidebar = bslib::sidebar(
+          #         sortable::bucket_list(
+          #           header = NULL,
+          #           sortable::add_rank_list(
+          #             text = "None",
+          #             labels = c("variable_name", "estimate_name", "time_interval"),
+          #             input_id = "summarise_trend_table_none"
+          #           ),
+          #           sortable::add_rank_list(
+          #             text = "Header",
+          #             labels = "cdm_name",
+          #             input_id = "summarise_trend_table_header"
+          #           ),
+          #           sortable::add_rank_list(
+          #             text = "Group columns",
+          #             labels = c("has_udi", "interval", "mapped_to_standard", "type", "omop_table"),
+          #             input_id = "summarise_trend_table_group_column"
+          #           ),
+          #           sortable::add_rank_list(
+          #             text = "Hide",
+          #             labels = "variable_level",
+          #             input_id = "summarise_trend_table_hide"
+          #           )
+          #         ),
+          #         position = "right"
+          #       ),
+          #       reactable::reactableOutput("summarise_trend_table") |>
+          #         shinycssloaders::withSpinner()
+          #     )
+          #   )
+          # ),
           bslib::nav_panel(
             title = "Plot Trends",
             bslib::card(
@@ -415,36 +419,39 @@ ui <- bslib::page_navbar(
                 class = "text-end"
               ),
               bslib::layout_sidebar(
+                
                 sidebar = bslib::sidebar(
                   shinyWidgets::materialSwitch(
                     inputId = "summarise_trend_plot_interactive",
                     label = "Interactive",
-                    value = TRUE
+                    value = FALSE
                   ),
-                  shinyWidgets::pickerInput(
-                    inputId = "summarise_trend_plot_output",
-                    label = "Output",
-                    choices = c("record", "person", "person-days", "age", "sex"),
-                    selected = "record",
-                    multiple = FALSE,
-                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                  ),
-                  shinyWidgets::pickerInput(
-                    inputId = "summarise_trend_plot_facet",
-                    label = "Facet",
-                    choices = c("cdm_name", "omop_table", "time_interval", "has_udi", "interval", "mapped_to_standard", "type"),
-                    selected = "cdm_name",
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                  ),
-                  shinyWidgets::pickerInput(
-                    inputId = "summarise_trend_plot_colour",
-                    label = "Colour",
-                    choices = c("cdm_name", "omop_table", "time_interval", "has_udi", "interval", "mapped_to_standard", "type"),
-                    selected = character(),
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
-                  ),
+                  
+                  # shinyWidgets::pickerInput(
+                  #   inputId = "summarise_trend_plot_output",
+                  #   label = "Output",
+                  #   choices = c("record", "person", "person-days", "age", "sex"),
+                  #   selected = "record",
+                  #   multiple = FALSE,
+                  #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+                  # ),
+                  # shinyWidgets::pickerInput(
+                  #   inputId = "summarise_trend_plot_facet",
+                  #   label = "Facet",
+                  #   choices = c("cdm_name", "omop_table", "time_interval", "has_udi", "interval", "mapped_to_standard", "type"),
+                  #   selected = "cdm_name",
+                  #   multiple = TRUE,
+                  #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+                  # ),
+                  # shinyWidgets::pickerInput(
+                  #   inputId = "summarise_trend_plot_colour",
+                  #   label = "Colour",
+                  #   choices = c("cdm_name", "omop_table", "time_interval", "has_udi", "interval", "mapped_to_standard", "type"),
+                  #   selected = character(),
+                  #   multiple = TRUE,
+                  #   options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3", `live-search` = TRUE)
+                  # ),
+                  
                   position = "right"
                 ),
                 shiny::uiOutput("summarise_trend_plot") |>

@@ -236,12 +236,52 @@ server <- function(input, output, session) {
     }
   )
   getSummariseTrendPlot <- shiny::reactive({
-    getSummariseTrendData() |>
-      OmopSketch::plotTrend(
-        output = input$summarise_trend_plot_output,
-        facet = input$summarise_trend_plot_facet,
-        colour = input$summarise_trend_plot_colour
-      )
+    # getSummariseTrendData() |>
+    #   OmopSketch::plotTrend(
+    #     output = input$summarise_trend_plot_output,
+    #     facet = input$summarise_trend_plot_facet,
+    #     colour = input$summarise_trend_plot_colour
+    #   )
+    plotTrendsByType <- function(result){
+      
+      attr(result, "settings") <- attr(result, "settings") |> 
+        mutate(trend_type = case_when(
+          has_udi == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
+          has_udi == "TRUE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwithout unique identifier",
+          has_udi == "FALSE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwithout unique identifier",
+          has_udi == "FALSE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwith unique identifier",
+          .default = "All records"
+        ))
+      
+      plot <- plotTrend(result, 
+                        colour = c("trend_type"))
+      plot@data |> 
+        mutate(year = stringr::str_extract(time_interval, "^\\d{4}") |> 
+                 as.integer()) |> 
+        ggplot() +
+        geom_point(aes(year, count, colour = trend_type)) +
+        geom_line(aes(year, count, group = trend_type, colour = trend_type)) +
+        facet_wrap(vars(cdm_name), scales = "free") +
+        theme_bw() +
+        ylim(c(0, NA))  +
+        scale_y_continuous(labels = scales::comma) +
+        theme(legend.title = element_blank(),
+              legend.position = "right", 
+              axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+        guides(colour = guide_legend(ncol = 1)) +
+        xlab("") +
+        ylab("Number of records")
+    }
+    
+    res |> 
+      dplyr::filter(
+      .data$cdm_name %in% input$summarise_trend_cdm_name
+      # ,
+      # .data$variable_name %in% input$summarise_trend_variable_name,
+      # .data$estimate_name %in% input$summarise_trend_estimate_name
+    ) |>
+    plotTrendsByType()
+    
   })
   output$summarise_trend_plot <- shiny::renderUI({
     tryCatch(
@@ -401,7 +441,53 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
   getSummariseTableTidy <- shiny::reactive({
-    tidyDT(getSummariseTableData(), input$summarise_table_tidy_columns, input$summarise_table_tidy_pivot_estimates)
+    
+    working_data <- getSummariseTableData() |> 
+      omopgenerics::tidy()
+
+    x <- working_data |> 
+      mutate(device_concept = paste0(device_concept_id_name,
+                                     " (", device_concept_id,
+                                     ")")) |> 
+      mutate(device_source_concept = paste0(
+        device_source_value, " (", 
+        device_source_concept_code, "; ",
+        device_source_concept_id, ")")) |> 
+      select(!c("variable_level",
+                "device_concept_id",
+                "device_concept_id_name",
+                "device_source_value",
+                "device_source_concept_code",
+                "device_source_concept_id")) |> 
+      pivot_wider(names_from = "variable_name", 
+                  values_from = "count") |> 
+      relocate(device_concept, .after = "cdm_name") |> 
+      relocate(device_source_concept, .after = "device_concept")
+    
+    if(exists("udi_counts")){
+    x <- x |> 
+      left_join(udi_counts) |> 
+      mutate(gudid = paste0(gudid_brand_name,
+                            " (",
+                            gudid_company_name,
+                            ")")) |> 
+      select(!c(gudid_brand_name,
+                gudid_company_name,
+                in_gudid))  |> 
+      relocate(gudid, .after = "unique_device_id")
+    }
+    
+    DT::datatable(
+      data = x,
+      filter = "top",
+      rownames = FALSE,
+      options = list(
+        dom = "ltipr", 
+        pageLength = 25
+      )
+    )
+    
+    
   })
   output$summarise_table_tidy <- DT::renderDT({
     getSummariseTableTidy()

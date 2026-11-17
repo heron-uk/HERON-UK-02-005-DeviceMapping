@@ -34,6 +34,9 @@ if (!file.exists(fileData)) {
 
 # load shiny data
 load(fileData)
+if(file.exists(here::here("udi_details", "udi_counts.csv"))){
+udi_counts <- readr::read_csv(here::here("udi_details", "udi_counts.csv"))
+}
 
 # source functions
 source(file.path(getwd(), "functions.R"))

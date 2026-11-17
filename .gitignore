@@ -7,3 +7,5 @@ shiny/data/studyData.RData
 shiny/rawData/*.csv
 shiny/report.docx
 study/results/*.csv
+/shiny/AccessGUDID_Delimited_Full_Release_20260202
+shiny/gudid.duckdb
