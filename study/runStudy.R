@@ -142,8 +142,8 @@ results[["udi_standard_source"]] <- counts |>
       "device_concept_id_name",
       "unique_device_id",
       "device_source_concept_id",
-      "device_source_concept_code",
-      "device_source_value"
+      "device_source_concept_id_name",
+      "device_source_concept_code"
     )
   ) |>
   omopgenerics::uniteStrata() |>
