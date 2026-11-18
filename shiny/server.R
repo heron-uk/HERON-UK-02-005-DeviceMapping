@@ -465,20 +465,20 @@ server <- function(input, output, session) {
                                      " (", device_concept_id,
                                      ")")) |> 
       mutate(device_source_concept = paste0(
-        device_source_value, " (", 
+        device_source_concept_id_name, " (", 
         device_source_concept_code, "; ",
         device_source_concept_id, ")")) |> 
-      select(!c("variable_level",
-                "device_concept_id",
-                "device_concept_id_name",
-                "device_source_value",
-                "device_source_concept_code",
-                "device_source_concept_id")) |> 
+      select(!dplyr::any_of(c("variable_level",
+                              "device_concept_id",
+                              "device_concept_id_name",
+                              "device_source_value",
+                              "device_source_concept_code",
+                              "device_source_concept_id",
+                              "device_source_concept_id_name"))) |> 
       pivot_wider(names_from = "variable_name", 
                   values_from = "count") |> 
       relocate(device_concept, .after = "cdm_name") |> 
-      relocate(device_source_concept, .after = "device_concept")
-    
+      relocate(device_source_concept, .after = "device_concept")    
     if(exists("udi_counts")){
     x <- x |> 
       left_join(udi_counts) |> 
