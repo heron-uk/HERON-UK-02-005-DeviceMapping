@@ -9,7 +9,7 @@ omopgenerics::validateCdmArgument(cdm,
 omopgenerics::assertNumeric(min_cell_count)
 
 # Create a log file ----
-createLogFile(logFile = tempfile(pattern = "log_{date}_{time}"))
+createLogFile(logFile = here::here("results", "log_{date}_{time}"))
 logMessage("LOG CREATED")
 
 # Initialise list to store results as we go -----
@@ -72,24 +72,90 @@ for(i in seq_along(mapped)){
 # summary of udi -----
 logMessage("udi summary")
 
-results[["udi_standard_source"]] <- cdm$device_exposure |>
-  mutate(year = clock::get_year(device_exposure_start_date),
-         device_concept_id = dplyr::coalesce(device_concept_id, 0L),
-         device_source_concept_id = dplyr::coalesce(device_source_concept_id, 0L),
-         unique_device_id = dplyr::coalesce(as.character(unique_device_id), "unknown")) |>
-  addConceptName("device_concept_id") |>
-  addConceptName("device_source_concept_id") |>
-  left_join(cdm$concept |>
-              select("device_source_concept_id"="concept_id",
-                     "device_source_concept_code" = "concept_code"),
-            by = c("device_source_concept_id")) |>
-  summariseResult(variables = character(),
-                  group = c("device_concept_id",
-                            "device_concept_id_name",
-                            "unique_device_id",
-                            "device_source_concept_id",
-                            "device_source_concept_code",
-                            "device_source_value"))
+counts <- cdm$device_exposure |>
+  dplyr::select(
+    "person_id",
+    "device_concept_id",
+    "unique_device_id",
+    "device_source_concept_id"
+  ) |>
+  dplyr::mutate(
+    device_concept_id = dplyr::coalesce(.data$device_concept_id, 0L),
+    device_source_concept_id = dplyr::coalesce(.data$device_source_concept_id, 0L),
+    unique_device_id = dplyr::coalesce(as.character(.data$unique_device_id), "unknown")
+  ) |>
+  dplyr::group_by(
+    .data$device_concept_id,
+    .data$unique_device_id,
+    .data$device_source_concept_id
+  ) |>
+  dplyr::summarise(
+    record_count = dplyr::n(),
+    person_count = dplyr::n_distinct(.data$person_id),
+    .groups = "drop"
+  ) |>
+  dplyr::left_join(
+    cdm$concept |>
+      dplyr::select(
+        "device_concept_id" = "concept_id",
+        "device_concept_id_name" = "concept_name"
+      ),
+    by = "device_concept_id"
+  ) |>
+  dplyr::left_join(
+    cdm$concept |>
+      dplyr::select(
+        "device_source_concept_id" = "concept_id",
+        "device_source_concept_id_name" = "concept_name",
+        "device_source_concept_code" = "concept_code"
+      ),
+    by = "device_source_concept_id"
+  ) |>
+  dplyr::collect()
+
+results[["udi_standard_source"]] <- counts |>
+  dplyr::mutate(
+    dplyr::across(dplyr::everything(), as.character)
+  ) |>
+  tidyr::pivot_longer(
+    cols = c("record_count", "person_count"),
+    names_to = "variable_name",
+    values_to = "estimate_value"
+  ) |>
+  dplyr::mutate(
+    variable_name = dplyr::if_else(
+      .data$variable_name == "record_count",
+      "number records",
+      "number subjects"
+    ),
+    variable_level = NA_character_,
+    estimate_name = "count",
+    estimate_type = "integer",
+    result_id = 1L,
+    cdm_name = omopgenerics::cdmName(cdm),
+    additional_name = "overall",
+    additional_level = "overall"
+  ) |>
+  omopgenerics::uniteGroup(
+    cols = c(
+      "device_concept_id",
+      "device_concept_id_name",
+      "unique_device_id",
+      "device_source_concept_id",
+      "device_source_concept_code",
+      "device_source_value"
+    )
+  ) |>
+  omopgenerics::uniteStrata() |>
+  omopgenerics::newSummarisedResult(
+    settings = dplyr::tibble(
+      result_id = 1L,
+      result_type = "summarise_table",
+      package_name = "PatientProfiles",
+      package_version = as.character(utils::packageVersion("PatientProfiles"))
+    )
+  )
+
 
 # export results ------
 logMessage("- export results")
