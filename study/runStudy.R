@@ -20,7 +20,8 @@ results[["snapshot"]] <- summariseOmopSnapshot(cdm)
 
 logMessage("Table summary")
 results[["tbl_summary"]] <- summariseClinicalRecords(cdm = cdm,
-                                                     omopTableName = "device_exposure")
+                                                     omopTableName = "device_exposure",
+                                                     conceptSummary = FALSE)
 
 logMessage("Trend - overall")
 results[["tbl_trend"]] <- summariseTrend(cdm = cdm,
