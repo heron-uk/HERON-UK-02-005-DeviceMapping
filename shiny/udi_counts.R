@@ -45,7 +45,8 @@ udi_counts <- udi_counts |>
   left_join(gudid$device |> 
               select("unique_device_id" = "PrimaryDI",
                      "gudid_brand_name" = "brandName",
-                     "gudid_company_name" = "companyName") |> 
+                     "gudid_company_name" = "companyName",
+                     "gudid_device_description" = "deviceDescription") |> 
               mutate(in_gudid = 1L),
             by = c("unique_device_id"),
             copy = TRUE)
@@ -55,6 +56,7 @@ udi_counts <- udi_counts |>
 
 # eudamed ---- 
 source("functions_eudamed.R")
+# get_eudamed_device("00889024263567") # test udi that should work
 # eudamed_devices <- get_eudamed_device(udi = udi_counts$unique_device_id |> unique())
 
 # save -----

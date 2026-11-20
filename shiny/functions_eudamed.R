@@ -7,7 +7,6 @@ get_eudamed_device <- function(udi, max_active = 10, max_batch_retries = 2, retr
   # Internal helper to run a single batch pass
   run_batch <- function(udi_subset, active_conns, pass_label = "Fetching EUDAMED devices") {
     reqs <- purrr::map(udi_subset, build_eudamed_request)
-    browser()
     resps <- httr2::req_perform_parallel(
       reqs,
       on_error = "continue",

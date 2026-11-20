@@ -288,7 +288,7 @@ server <- function(input, output, session) {
         ylab("Number of records")
     }
     
-    res |> 
+    data[["summarise_trend"]] |> 
       dplyr::filter(
       .data$cdm_name %in% input$summarise_trend_cdm_name
       # ,
@@ -468,6 +468,19 @@ server <- function(input, output, session) {
         device_source_concept_id_name, " (", 
         device_source_concept_code, "; ",
         device_source_concept_id, ")")) |> 
+      pivot_wider(names_from = "variable_name", 
+                  values_from = "count") |> 
+      relocate(device_concept, .after = "cdm_name") |> 
+      relocate(device_source_concept, .after = "device_concept") 
+    
+    x <- x |> 
+      left_join(devices |> 
+                  select(!"device_name") |> 
+                  mutate(device_concept_id = as.character(device_concept_id)),
+                by = join_by(cdm_name, device_concept_id,
+                             device_concept_id_name, unique_device_id))
+    
+    x <- x |> 
       select(!dplyr::any_of(c("variable_level",
                               "device_concept_id",
                               "device_concept_id_name",
@@ -475,22 +488,9 @@ server <- function(input, output, session) {
                               "device_source_concept_code",
                               "device_source_concept_id",
                               "device_source_concept_id_name"))) |> 
-      pivot_wider(names_from = "variable_name", 
-                  values_from = "count") |> 
-      relocate(device_concept, .after = "cdm_name") |> 
-      relocate(device_source_concept, .after = "device_concept")    
-    if(exists("udi_counts")){
-    x <- x |> 
-      left_join(udi_counts) |> 
-      mutate(gudid = paste0(gudid_brand_name,
-                            " (",
-                            gudid_company_name,
-                            ")")) |> 
-      select(!c(gudid_brand_name,
-                gudid_company_name,
-                in_gudid))  |> 
-      relocate(gudid, .after = "unique_device_id")
-    }
+      relocate(`number records`, .after = last_col()) |>
+      relocate(`number subjects`, .after = last_col()) |>
+      arrange(desc(`number records`))
     
     DT::datatable(
       data = x,
