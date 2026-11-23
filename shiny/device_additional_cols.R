@@ -13,11 +13,16 @@ library(scales)
 library(stringr)
 library(patchwork)
 library(httr2)
+library(ellmer)
+library(MedicalDeviceClassifier)
 
 res <- importSummarisedResult(here::here("rawData"))
 omop_dmd_groups <- readr::read_csv(here::here("omop_dmd","omop_dmd_groups.csv"))
-chat <- ellmer::chat_google_gemini(model =  "gemini-3.5-flash-lite",
-                                   params = params(temperature = 0))
+# chat <- ellmer::chat_google_gemini(model =  "gemini-3.5-flash-lite",
+#                                    params = params(temperature = 0))
+ch <- chat_openrouter(
+  model = "google/gemini-3.5-flash-lite"
+)
 
 # devices in the network ------
 devices <- res |> 
@@ -66,11 +71,6 @@ source("functions_eudamed.R")
 # eudamed_devices <- get_eudamed_device(udi = udi_counts$unique_device_id |> unique())
 
 # Add llm classifications -----
-source("classify_medical_devices.R")
-
-## 1) categorise dmd codes ------
-# will use the vmp code to reduce number and just use the vmp name
-# filtered to only those in use
 devices <- devices |>
   unite(
     col = "device_name",
@@ -84,8 +84,9 @@ devices <- devices |>
     remove = FALSE
   )
 
-devices <- classify_medical_devices(chat = chat, 
-                                    devices) 
+devices <- classifyMedicalDevices(chat = ch, 
+                                  data = devices, 
+                                  batchSize = 25)
 
 # save -----
 readr::write_csv(devices, file = here::here("devices.csv"))

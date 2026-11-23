@@ -18,11 +18,30 @@ working_data <- data[["summarise_table"]]|>
 
 
 working_data |> 
+  filter(is_medical_device == "yes") |> 
   filter_out(device_concept_id == "0" & is.na(gudid_brand_name)) |> 
   # filter(cdm_name != "CPRD GOLD") |> 
-  group_by(cdm_name, medical_specialty) |> 
+  group_by(cdm_name, medical_speciality) |> 
   summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop") |> 
-  ggplot(aes(area = total_count, fill = medical_specialty, label = medical_specialty)) +
+  ggplot(aes(area = total_count, fill = medical_speciality, label = medical_speciality)) +
+  geom_treemap() +
+  geom_treemap_text(
+    colour = "white",
+    place = "centre",
+    grow = TRUE,
+    reflow = TRUE
+  ) +
+  labs(title = "Counts by Medical Specialty") +
+  theme(legend.position = "bottom") +
+  facet_wrap(vars(cdm_name))
+
+working_data |> 
+  filter(is_medical_device == "yes") |> 
+  filter_out(device_concept_id == "0" & is.na(gudid_brand_name)) |> 
+  # filter(cdm_name != "CPRD GOLD") |> 
+  group_by(cdm_name, device_class) |> 
+  summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop") |> 
+  ggplot(aes(area = total_count, fill = device_class, label = device_class)) +
   geom_treemap() +
   geom_treemap_text(
     colour = "white",
@@ -37,25 +56,26 @@ working_data |>
 # 1. Assign a base color per specialty
 library(colorspace)
 library(scales)
-specialties <- sort(unique(working_data$medical_specialty))
+specialties <- sort(unique(working_data$medical_speciality))
 base_palette <- setNames(hue_pal(l = 65, c = 100)(length(specialties)), specialties)
 
-# 2. Compute exact shade per (medical_specialty, device_class)
+# 2. Compute exact shade per (medical_speciality, device_class)
 plot_data <- working_data |>  
-  filter_out(device_concept_id == "0" & is.na(gudid_brand_name)) |> 
-  group_by(cdm_name, medical_specialty, device_class) |> 
+  filter(is_medical_device == "yes") |> 
+  group_by(cdm_name, medical_speciality, device_class) |> 
   summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop") |> 
   mutate(
     device_class = factor(
       device_class, 
       levels = c("Class I", "Class IIa", "Class IIb", "Class III")
     ),
-    base_col = base_palette[medical_specialty],
+    base_col = base_palette[medical_speciality],
     shade_amount = case_when(
       device_class == "Class I"   ~ -0.35, # Lighter
       device_class == "Class IIa" ~ -0.10,
       device_class == "Class IIb" ~  0.15,
-      device_class == "Class III" ~  0.40  # Darker
+      device_class == "Class III" ~  0.40, # Darker  
+      .default =  0
     ),
     tile_fill = darken(base_col, amount = shade_amount)
   )
@@ -63,7 +83,7 @@ plot_data <- working_data |>
 ggplot(plot_data, aes(
   area = total_count,
   fill = tile_fill,
-  subgroup = medical_specialty,
+  subgroup = medical_speciality,
   label = device_class
 )) +
   geom_treemap(colour = "white", size = 0.8) +
