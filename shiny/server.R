@@ -479,6 +479,9 @@ server <- function(input, output, session) {
                   mutate(device_concept_id = as.character(device_concept_id)),
                 by = join_by(cdm_name, device_concept_id,
                              device_concept_id_name, unique_device_id))
+ 
+    x <- x |> 
+      filter(is_medical_device == "yes")
     
     x <- x |> 
       select(!dplyr::any_of(c("variable_level",
