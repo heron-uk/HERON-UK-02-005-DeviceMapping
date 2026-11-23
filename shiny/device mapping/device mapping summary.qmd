@@ -14,7 +14,86 @@ library(colorspace)
 library(scales)
 library(readr)
 library(tidyverse)
+library(OmopSketch)
+library(cowplot)
+library(RColorBrewer)
 
+plotTrendsByType <-  function(result){
+ 
+   attr(result, "settings") <- attr(result, "settings") |> 
+    mutate(trend_type = as.factor(case_when(
+      has_udi == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
+      has_udi == "TRUE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwithout unique identifier",
+      has_udi == "FALSE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwithout unique identifier",
+      has_udi == "FALSE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwith unique identifier",
+      .default = "All records"
+    )) )
+  
+  colour_set <- c(unique(attr(result, "settings")$trend_type))
+  colour_set <- colour_set |> str_replace(  "All records", "#F8766D") |> 
+    str_replace( "Standard concept,\nwith unique identifier", "#00B0F6") |> 
+    str_replace( "Standard concept,\nwithout unique identifier", "#E76BF3") |>
+    str_replace( "No standard concept,\nwith unique identifier", "#A3A500") |>
+    str_replace( "No standard concept,\nwithout unique identifier", "#00BF7D")
+  
+  plot <- plotTrend(result, colour = c("trend_type") )
+  
+  plot@data |> 
+    mutate(year = stringr::str_extract(time_interval, "^\\d{4}") |> 
+             as.integer()) |> 
+    ggplot(aes(colour=trend_type)) +
+    geom_point(aes(year, count)) +
+    geom_line(aes(year, count, group = trend_type)) +
+    scale_colour_manual(values= setNames(colour_set, c(unique(attr(result, "settings")$trend_type))) ) +
+    facet_wrap(vars(cdm_name), scales = "free") + 
+    theme_bw() + 
+    theme(legend.title = element_blank(),
+          legend.position = "right", 
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    guides(colour = guide_legend(ncol = 1)) +
+    #theme(legend.position="none") +
+    ylim(c(0, NA))  +
+    scale_y_continuous(labels = scales::comma) +
+    xlab("") +
+    ylab("Number of records")
+  
+}
+plotTrendsByType_nl <-  function(result){
+  
+  attr(result, "settings") <- attr(result, "settings") |> 
+    mutate(trend_type = as.factor(case_when(
+      has_udi == "TRUE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwith unique identifier",
+      has_udi == "TRUE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwithout unique identifier",
+      has_udi == "FALSE" & mapped_to_standard == "TRUE" ~ "Standard concept,\nwithout unique identifier",
+      has_udi == "FALSE" & mapped_to_standard == "FALSE" ~ "No standard concept,\nwith unique identifier",
+      .default = "All records"
+    )) )
+  
+  colour_set <- c(unique(attr(result, "settings")$trend_type))
+  colour_set <- colour_set |> str_replace(  "All records", "#F8766D") |> 
+    str_replace( "Standard concept,\nwith unique identifier", "#00B0F6") |> 
+    str_replace( "Standard concept,\nwithout unique identifier", "#E76BF3") |>
+    str_replace( "No standard concept,\nwith unique identifier", "#A3A500") |>
+    str_replace( "No standard concept,\nwithout unique identifier", "#00BF7D")
+  
+  plot <- plotTrend(result, colour = c("trend_type") )
+  
+  plot@data |> 
+    mutate(year = stringr::str_extract(time_interval, "^\\d{4}") |> 
+             as.integer()) |> 
+    ggplot(aes(colour=trend_type)) +
+    geom_point(aes(year, count)) +
+    geom_line(aes(year, count, group = trend_type)) +
+    scale_colour_manual(values= setNames(colour_set, c(unique(attr(result, "settings")$trend_type))) ) +
+    facet_wrap(vars(cdm_name), scales = "free") + 
+    theme_bw() + 
+    theme(legend.position="none") +
+    ylim(c(0, NA))  +
+    scale_y_continuous(labels = scales::comma) +
+    xlab("") +
+    ylab("Number of records")
+  
+}
 filterResult <- function(result, filt) {
 
   q <- function(nm) {
@@ -154,6 +233,7 @@ resultList <- list(
 
 #Step 1
 result <- omopgenerics::importSummarisedResult("/Users/ah22023/Documents/GitHub/HERON-UK-02-005-DeviceMapping/shiny/rawData/results_GOSH_OMOP_2026_11_18.csv")
+GOSH_result <- result 
 data <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
 choices <- values
@@ -240,6 +320,7 @@ ggplot(plot_data, aes(
 
 #Step 1
 result <- omopgenerics::importSummarisedResult("/Users/ah22023/Documents/GitHub/HERON-UK-02-005-DeviceMapping/shiny/rawData/results_BartsHealthOMOP_2026_07_02.csv")
+Barts_result <- result 
 data <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
 choices <- values
@@ -326,6 +407,7 @@ ggplot(plot_data, aes(
 
 #Step 1
 result <- omopgenerics::importSummarisedResult("/Users/ah22023/Documents/GitHub/HERON-UK-02-005-DeviceMapping/shiny/rawData/results_CPRD GOLD_2026_11_18.csv")
+CPRD_Gold_result <- result 
 data <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
 choices <- values
@@ -412,6 +494,7 @@ ggplot(plot_data, aes(
 
 #Step 1
 result <- omopgenerics::importSummarisedResult("/Users/ah22023/Documents/GitHub/HERON-UK-02-005-DeviceMapping/shiny/rawData/results_IDRIL_1_2026_07_01.csv")
+IDRIL_result <- result 
 data <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
 choices <- values
@@ -491,14 +574,14 @@ ggplot(plot_data, aes(
 
 ```
 
-
-# Aurum CDM
+# Aurum
 
 ```{r, fig.width=9,fig.height=7}
 #Plot 1
 
 #Step 1
 result <- omopgenerics::importSummarisedResult("/Users/ah22023/Documents/GitHub/HERON-UK-02-005-DeviceMapping/shiny/rawData/results_AurumCDM_202603_2026_11_18.csv")
+Aurum_CDM_result <- result
 data <- prepareResult(result, resultList)
 values <- getValues(result, resultList)
 choices <- values
@@ -531,4 +614,23 @@ working_data |>
 
 ```
 
+{{< pagebreak >}}
 
+# Device Record Trends
+
+```{r, fig.width=15, fig.height=20}
+
+GOSH_plot <- plotTrendsByType_nl(GOSH_result)
+Barts_plot <- plotTrendsByType_nl(Barts_result)
+Aurum_plot <- plotTrendsByType_nl(Aurum_CDM_result)
+Gold_plot <- plotTrendsByType_nl(CPRD_Gold_result)
+IDRIL_plot <- plotTrendsByType(IDRIL_result)
+
+top <- plot_grid(plotlist = list(GOSH_plot, Barts_plot, Gold_plot, Aurum_plot ), 
+          ncol = 2, nrow=2)  + theme(plot.background = element_rect(fill = "white", color = NA))
+nested <- plot_grid(plotlist = list(top, IDRIL_plot ), rel_heights = c(1,0.9),  ncol = 1, nrow=2, scale=c(1,0.65), axis = "l")  + 
+  theme(plot.background = element_rect(fill = "white", color = NA))
+nested 
+
+
+```
