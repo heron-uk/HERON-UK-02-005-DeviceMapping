@@ -4,7 +4,7 @@ library(ggplot2)
 library(treemapify)
 
 load(here::here("data", "studyData.RData"))
-devices <- readr::read_csv(here::here("devices.csv"))
+devices <- readr::read_csv(here::here("devices.csv")) |> unique()
 
 
 working_data <- data[["summarise_table"]]|> 
@@ -92,12 +92,12 @@ ggplot(plot_data, aes(
     place = "topleft",
     fontface = "bold",
     colour = "white",
-    size = 12
+    size = 10
   ) +
   geom_treemap_text(
     place = "bottomright",
     colour = "white",
-    size = 9,
+    size = 5,
     reflow = TRUE
   ) +
   scale_fill_identity() +
