@@ -10,3 +10,4 @@ study/results/*.csv
 /shiny/AccessGUDID_Delimited_Full_Release_20260202
 shiny/gudid.duckdb
 shiny/rsconnect/shinyapps.io/dpa-pde-oxford/HERON-UK-Devices.dcf
+.positai

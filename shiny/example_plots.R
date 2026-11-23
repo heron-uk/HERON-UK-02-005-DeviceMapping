@@ -1,11 +1,11 @@
 
+library(here)
 library(dplyr)
 library(ggplot2)
 library(treemapify)
 
 load(here::here("data", "studyData.RData"))
 devices <- readr::read_csv(here::here("devices.csv"))
-
 
 working_data <- data[["summarise_table"]]|> 
   omopgenerics::tidy() |> 
@@ -14,8 +14,6 @@ working_data <- data[["summarise_table"]]|>
               mutate(device_concept_id = as.character(device_concept_id)),
             by = join_by(cdm_name, device_concept_id,
                          device_concept_id_name, unique_device_id))
-
-
 
 working_data |> 
   filter_out(device_concept_id == "0" & is.na(gudid_brand_name)) |> 
