@@ -20,7 +20,7 @@ working_data <- data[["summarise_table"]]|>
 working_data |> 
   filter(is_medical_device == "yes") |> 
   filter_out(device_concept_id == "0" & is.na(gudid_brand_name)) |> 
-  # filter(cdm_name != "CPRD GOLD") |> 
+  filter(str_detect(cdm_name, "CPRD GOLD|Aurum", negate = TRUE)) |> 
   group_by(cdm_name, medical_speciality) |> 
   summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop") |> 
   ggplot(aes(area = total_count, fill = medical_speciality, label = medical_speciality)) +
@@ -32,13 +32,14 @@ working_data |>
     reflow = TRUE
   ) +
   labs(title = "Counts by Medical Specialty") +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank()) +
   facet_wrap(vars(cdm_name))
 
 working_data |> 
   filter(is_medical_device == "yes") |> 
   filter_out(device_concept_id == "0" & is.na(gudid_brand_name)) |> 
-  # filter(cdm_name != "CPRD GOLD") |> 
+  filter(str_detect(cdm_name, "CPRD GOLD|Aurum", negate = TRUE)) |> 
   group_by(cdm_name, device_class) |> 
   summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop") |> 
   ggplot(aes(area = total_count, fill = device_class, label = device_class)) +
@@ -49,8 +50,9 @@ working_data |>
     grow = TRUE,
     reflow = TRUE
   ) +
-  labs(title = "Counts by Medical Specialty") +
-  theme(legend.position = "bottom") +
+  labs(title = "Counts by Device Class") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank()) +
   facet_wrap(vars(cdm_name))
 
 # 1. Assign a base color per specialty
@@ -61,6 +63,7 @@ base_palette <- setNames(hue_pal(l = 65, c = 100)(length(specialties)), specialt
 
 # 2. Compute exact shade per (medical_speciality, device_class)
 plot_data <- working_data |>  
+  filter(str_detect(cdm_name, "CPRD GOLD|Aurum")) |> 
   filter(is_medical_device == "yes") |> 
   group_by(cdm_name, medical_speciality, device_class) |> 
   summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop") |> 
@@ -103,3 +106,27 @@ ggplot(plot_data, aes(
   scale_fill_identity() +
   theme_void() +
   facet_wrap(vars(cdm_name))
+
+
+# top devices -----
+working_data |>  
+  filter(str_detect(cdm_name, "CPRD GOLD|Aurum", negate = TRUE)) |> 
+  filter(is_medical_device == "yes") |> 
+  group_by(cdm_name, device_concept_id_name, 
+           gudid_brand_name,
+           medical_speciality, device_class) |> 
+  summarise(total_count = sum(count, na.rm = TRUE), 
+            .groups = "drop") |> 
+  arrange(desc(total_count)) |>
+  group_by(cdm_name) |> 
+  filter(row_number() <= 5) |> 
+  mutate(rank = row_number()) |> 
+  select("rank",
+         "cdm_name",
+         "device_concept_id_name",
+         "gudid_brand_name",
+         "medical_speciality",
+         "device_class",
+         "total_count") |> 
+  mutate(total_count = scales::comma(total_count)) |> 
+  visOmopResults::visTable(groupColumn = "cdm_name")

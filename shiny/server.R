@@ -481,7 +481,8 @@ server <- function(input, output, session) {
                              device_concept_id_name, unique_device_id))
  
     x <- x |> 
-      filter(is_medical_device == "yes")
+      filter(is_medical_device == "yes") |> 
+      select(!is_medical_device)
     
     x <- x |> 
       select(!dplyr::any_of(c("variable_level",
